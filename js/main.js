@@ -176,7 +176,7 @@ function noise({ dur = 0.5, gain = 0.3, filter = 'bandpass', freq = 1000, freqTo
 }
 
 const sfx = {
-  lampBeep: (i) => tone({ freq: [523, 659, 784][i], type: 'square', dur: 0.18, gain: 0.12 }),
+  lampBeep: (step) => tone({ freq: LAMP_PITCHES[step], type: 'square', dur: 0.18, gain: 0.12 }),
   wrong: () => { tone({ freq: 140, type: 'sawtooth', dur: 0.35, gain: 0.18 }); tone({ freq: 147, type: 'sawtooth', dur: 0.35, gain: 0.12 }); },
   zap: () => { noise({ dur: 0.35, gain: 0.35, filter: 'highpass', freq: 2500 }); tone({ freq: 120, type: 'sawtooth', dur: 0.3, gain: 0.12 }); },
   surge: () => tone({ freq: 90, type: 'triangle', dur: 0.9, gain: 0.25, slideTo: 180 }),
@@ -299,23 +299,29 @@ $$('.prop').forEach((el) => {
 });
 
 // ============================================================
-// Story 1 trigger: light the three warning lamps from top to bottom
+// Story 1 trigger: light the three warning lamps in LAMP_ORDER.
+// Playtest 3: testers solved a 3-lamp order in 2–3 s. With 3 lamps every order is a
+// rotation of a top-down or bottom-up sweep, so sweeping always wins. A 4-step pattern
+// with one repeated lamp can't be swept; only the lamps' own blink pattern reveals it.
 // ============================================================
 const lamps = $$('.lamp');
+const LAMP_ORDER = [1, 2, 1, 0];          // lamp data-index per step → middle, bottom, middle, top
+const LAMP_PITCHES = [523, 659, 784, 1047]; // rising with progress (C5 E5 G5 C6)
 let lampProgress = 0;
 
 function onLampTap(el) {
   const index = Number(el.dataset.index);
   react(el, 'is-tapped', 250);
-  if (index === lampProgress) {
+  if (index === LAMP_ORDER[lampProgress]) {
     el.classList.add('is-lit');
-    sfx.lampBeep(index);
+    sfx.lampBeep(lampProgress); // pitch rises with progress, not with lamp position
     lampProgress++;
-    el.querySelector('.lamp-pip').textContent = lampProgress + '/3';
+    el.querySelector('.lamp-pip').textContent = `${lampProgress}/${LAMP_ORDER.length}`;
+    react(el, 'is-relit', 1400); // restarts the pip even when a lit lamp is tapped again
     hints.idleSince = clock.now; // progress counts as activity
     hints.nudges = 0;
-    if (lampProgress === 3) after(450, startLabBreach, 'story');
-  } else if (!el.classList.contains('is-lit')) {
+    if (lampProgress === LAMP_ORDER.length) after(450, startLabBreach, 'story');
+  } else {
     // Wrong lamp: buzz, blink all lamps amber, reset progress
     sfx.wrong();
     resetLamps();
@@ -324,14 +330,15 @@ function onLampTap(el) {
   }
 }
 
-// Diegetic pattern hint: the lamps glow softly top → bottom with quiet beeps.
+// Diegetic pattern hint: the lamps glow softly in LAMP_ORDER with quiet rising beeps
+// (the same pitches a correct tap plays). Slow enough to read the order.
 // Runs only while no lamp is lit, so it never fights the player's own progress.
 function blinkLamps() {
   if (stage.dataset.state !== 'explore' || lampProgress !== 0) return;
-  lamps.forEach((l, i) => after(i * 320, () => {
+  LAMP_ORDER.forEach((lampIndex, step) => after(step * 550, () => {
     if (lampProgress !== 0 || stage.dataset.state !== 'explore') return;
-    react(l, 'is-hinting', 700);
-    tone({ freq: [523, 659, 784][i], type: 'sine', dur: 0.15, gain: 0.035 });
+    react(lamps[lampIndex], 'is-hinting', 700);
+    tone({ freq: LAMP_PITCHES[step], type: 'sine', dur: 0.18, gain: 0.04 });
   }, 'blink-step'));
 }
 
@@ -459,8 +466,8 @@ const hintEl = document.getElementById('hint');
 // Discovery pacing (tuned from playtests; see plan.md). Raise these to give more exploring time.
 const HINTS = [
   { after: 15000, text: 'Something in the lab keeps blinking…' },
-  { after: 35000, text: 'Those lab lights seem to blink in a certain order.' },
-  { after: 60000, text: 'Alarms usually start at the top…' },
+  { after: 35000, text: 'Those lab lights blink in a certain order. Were you watching?' },
+  { after: 60000, text: 'Count the blinks… one light speaks twice.' },
 ];
 const NUDGE_MS = 1000;          // each tap on a non-trigger prop counts as this much extra idle time
 const FIRST_PATTERN_MS = 12000; // first ambient lamp-pattern blink after Enter

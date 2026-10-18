@@ -108,3 +108,23 @@ When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HH
   - All pacing values are named constants at the top of the hints section in `js/main.js`.
 - **Verified (Agent, CDP):** after 3 off-target taps there's no blink and no hint; the 4th tap brings the lamp blink; the door text and no-newspapers change are confirmed.
 - **Next:** playtest again and watch the time to first lamp tap. If it's now too slow, lower `POINT_AFTER_TAPS` or the hint times.
+
+### 2026-10-18: Peer playtest 3 (Phase 1)
+
+- **Observed (relayed by the Developer):** time to the first lamp tap was 2 s, 3 s and 3 s for three testers.
+- **Interpretation:** all three tapped before any hint could fire (the first blink is at 12 s, the first text hint at 15 s), so the lamps themselves gave it away.
+  1. The ripple rings added in playtest 1 made the lamps the most "tappable"-looking thing on screen.
+  2. Top→bottom is reading order, so the first guess solved it.
+  3. *Agent simulation:* with 3 lamps, every order is a rotation of a top-down or bottom-up sweep, so repeated sweeping solves any 3-step order in 3–5 taps.
+- **Revision (Developer approved):**
+  - Removed the ripple rings.
+  - The trigger is now a 4-step pattern with a repeat: **middle → bottom → middle → top** (`LAMP_ORDER`).
+  - Beeps rise with progress (C5–C6), and pips show n/4.
+  - The pattern blink plays this order at 0.55 s per step.
+  - Hints: 35 s "Those lab lights blink in a certain order. Were you watching?", 60 s "Count the blinks… one light speaks twice."
+- **Verified (Agent, CDP):**
+  - 12 top-down sweep taps reach only 2/4, and 12 bottom-up taps reach 0
+  - the correct pattern starts the story, and the repeated lamp shows "3/4"
+  - the blink order was recorded as 1@12.0 s, 2@12.6 s, 1@13.1 s, 0@13.7 s
+  - no console errors
+- **Next:** playtest again and time both the first lamp tap and the full solve. The risk is now the other way: if testers never notice the blink, the 35/60 s hints need to arrive sooner.

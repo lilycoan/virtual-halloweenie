@@ -50,8 +50,8 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 **Play/Pause.** One small corner button (≥44px, keyboard-focusable, with `aria-pressed`). It freezes all motion, sound, timers and taps, including mid-story, and resumes exactly where things stopped.
 
 **Story 1: Lab Breach (provisional).**
-- *Trigger:* tap the three facade warning lights in the correct order (top → middle → bottom; to be tested).
-  - A correct tap lights that lamp solid red and plays a rising beep (beep pitch 1/2/3), so progress is visible.
+- *Trigger:* tap the facade warning lights in a 4-step pattern: **middle → bottom → middle → top** (`LAMP_ORDER`). *Revised after playtest 3: any 3-step order can be solved by sweeping.*
+  - A correct tap lights that lamp solid red, plays a beep that rises with progress (C5/E5/G5/C6) and pops an n/4 pip, so progress is visible.
   - A wrong tap plays a buzz, all lamps blink, and progress resets.
   - Other props (car, streetlight, neon, crows) each give their own small tap reaction and sound, but don't advance the story.
 - *Sequence (~8s):*
@@ -64,24 +64,24 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 - Framing: "Something is sealed inside the lab. Can you wake it up?" The badge reads "Lab events n/N". *Replaced the earlier "secrets" wording, which testers misread.*
 - On the first completion of a story, a center **UNLOCKED: [story]** card appears with a chime, then flies into the badge.
 - Shared prop rule: every non-trigger prop tap ends by blinking the lamp pattern. The lamps answer only after 4 off-target taps, with a 15 s cooldown. The lab door reads "ACCESS DENIED". *Revised after playtest 2: the earlier version was too direct.*
-- Unlit lamps show a ripple ring as a tap affordance.
+- ~~Unlit lamps show a ripple ring as a tap affordance.~~ Removed after playtest 3: it made the lamps too obvious.
 - The start screen states the goal, and a "Secrets n/N" badge sits top-left. Each story counts once, and replays don't add to it.
 - N = `EVENT_TOTAL` in `js/main.js`.
   - **Phase 1: N = 1.** The Developer's call (2026-10-18), so playtesters don't hunt for stories that don't exist yet. 
   - **Phase 2:** set N = 3. The goal becomes "…wake all 3 events?", and the found message switches between "the city is hiding more" and "You woke the lab!".
 
 **Hints (progressive, never instructions).**
-- *In-scene hint:* first at 12 s, then every 14 s (every 24 s once found), while no lamp is lit, the lamps softly glow top→bottom with quiet beeps.
+- *In-scene hint:* first at 12 s, then every 14 s (every 24 s once found), while no lamp is lit, the lamps softly blink the 4-step pattern (0.55 s per step) with quiet rising beeps.
 - *Text hints:* they appear by "effective idle", which is the time since last progress plus 1 s per non-lamp tap:
   - 15 s: "Something in the lab keeps blinking…"
-  - 35 s: "Those lab lights seem to blink in a certain order."
-  - 60 s: "Alarms usually start at the top…"
+  - 35 s: "Those lab lights blink in a certain order. Were you watching?"
+  - 60 s: "Count the blinks… one light speaks twice."
 - *Reaction messages:*
   - wrong lamp: "Wrong order… the alarm system reset." (3 s)
   - mid-progress: "The lab noticed you… keep going."
   - story done: "Secret found! The city is hiding more…" while some remain, or "You woke the lab! Tap the lights again to replay." once all are found (4 s)
   - after that: "The lab is resetting… it might breach again." (15 s idle)
-- Each correct lamp pops a "1/3", "2/3" or "3/3" pip.
+- Each correct tap pops an n/4 pip.
 
 **Accessibility.** Every interactive prop is a focusable `<button>` with an aria-label, and Enter/Space activate it. Visible focus rings. Text ≥16px with contrast ≥4.5:1. Tap targets ≥44px.
 

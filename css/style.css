@@ -233,7 +233,7 @@ body {
   opacity: 0;
   pointer-events: none;
 }
-.lamp.is-lit .lamp-pip { animation: pip-pop 1.4s ease-out; }
+.lamp.is-relit .lamp-pip { animation: pip-pop 1.4s ease-out; }
 @keyframes pip-pop {
   0%   { opacity: 0; transform: translateX(-20%); }
   15%, 70% { opacity: 1; transform: none; }
@@ -241,26 +241,6 @@ body {
 }
 .lamp.is-tapped { animation: tap-bump 0.25s ease-out; }
 
-/* "Tap me" affordance: a soft ring ripples out of each unlit lamp */
-.lamp::after {
-  content: "";
-  position: absolute;
-  inset: 20%;
-  border-radius: 50%;
-  border: 0.6cqw solid rgba(255, 130, 130, 0.85);
-  opacity: 0;
-  pointer-events: none;
-  animation: lamp-ring 2.4s ease-out infinite;
-}
-.lamp[data-index="1"]::after { animation-delay: 0.3s; }
-.lamp[data-index="2"]::after { animation-delay: 0.6s; }
-.lamp.is-lit::after,
-.stage[data-state="story"] .lamp::after { display: none; }
-@keyframes lamp-ring {
-  0%   { transform: scale(0.95); opacity: 0.85; }
-  100% { transform: scale(1.75); opacity: 0; }
-}
-.reduced-motion .lamp::after { animation: none; opacity: 0.6; transform: scale(1.25); }
 @keyframes tap-bump { 50% { transform: translate(-50%, -50%) scale(1.15); } }
 
 /* --- Moon --- */
