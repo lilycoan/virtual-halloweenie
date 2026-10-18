@@ -23,6 +23,15 @@ reducedMotionQuery.addEventListener('change', applyReducedMotion);
 
 if (params.has('debug')) document.body.classList.add('debug');
 
+// All state changes go through here. While the start screen is up, the scene behind it is
+// inert, so Tab reaches Enter first and hidden props can't be focused or activated.
+const sceneLayers = [...stage.querySelectorAll('.layer-props, .layer-ui')];
+function setState(next) {
+  stage.dataset.state = next;
+  sceneLayers.forEach((layer) => { layer.inert = next === 'start'; });
+}
+setState('start');
+
 // ============================================================
 // Scene clock: advances only while the scene is running and not paused
 // ============================================================
@@ -233,7 +242,7 @@ const credits = document.getElementById('credits');
 
 document.getElementById('enter-btn').addEventListener('click', () => {
   initAudio();
-  stage.dataset.state = 'explore';
+  setState('explore');
   hints.idleSince = clock.now;
   scheduleAmbientEvent();
   after(FIRST_PATTERN_MS, playLampPattern, 'pattern');
@@ -404,7 +413,7 @@ function setBanner(text, cls) {
 }
 
 function startLabBreach() {
-  stage.dataset.state = 'story';
+  setState('story');
   setHint('');
   setAmbientLevel(0.15);
   const T = (ms, fn) => after(ms, fn, 'story');
@@ -448,7 +457,7 @@ function endLabBreach() {
   setBanner('');
   resetLamps();
   setAmbientLevel(0.7, 1.5);
-  stage.dataset.state = 'explore';
+  setState('explore');
   hints.level = 0;
   hints.idleSince = clock.now;
   hints.nudges = 0;
@@ -546,7 +555,7 @@ function revealEvent(id, title) {
 // ?skip  : bypass the start screen (no audio; for screenshots)
 // ?story : run the story immediately after Enter/skip
 if (params.has('skip')) {
-  stage.dataset.state = 'explore';
+  setState('explore');
   if (params.has('story')) after(300, startLabBreach, 'story');
 }
 window.labBreach = startLabBreach; // console: labBreach()

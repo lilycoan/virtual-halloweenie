@@ -31,7 +31,12 @@ Main risk: mobile audio unlock and overlay alignment on real phones, so we deplo
 - [x] **3. Ambient effects + CC0 ambient audio.** Fog (2 depths), streetlight flicker, beacon pulse, shamblers, newspapers, a flying crow, a wind loop, and random groans/caws/siren. *Agent verified:* all 8 buffers decode with no console errors. *Developer:* needs to listen on a phone.
 - [x] **4. Lab Breach sequence.** ~8.6 s, plus a 0.45 s lead-in: alarm 0–1.8 s → gas/zombies 1.8–6 s → decon flash/ALL CLEAR 6–8.6 s. *Agent verified* with screenshots of each phase. Debug: `labBreach()` in the console, or `?skip&story`.
 - [x] **5. Trigger, prop reactions, hints, input lock, credits.** *Agent verified:* the wrong lamp resets, 3 correct lamps start the story, the moon tap is ignored during the story, the state returns to explore with lamps reset, and the credits panel renders.
-- [ ] **6. Full keyboard + phone verification, then Phase 1 playtest**
+- [x] **6. Full keyboard + phone verification, then Phase 1 playtests.**
+  - *Developer:* verified on an iPhone (works, sound good) and ran 4 rounds of peer playtests (below).
+  - *Agent, keyboard-only test with real key events:*
+    - It found and fixed a bug: Tab went to the hidden scene props before Enter.
+    - Fix: one `setState()` now makes the scene layers `inert` on the start screen.
+    - Re-test: Tab → Enter first, then the props in order → Pause. Space/Enter activate lamps, P pauses and blocks input, and the story returns focus to the scene. The focus ring is visible.
 
 Dev flags: `?debug` outlines tap targets; `?skip` bypasses the start screen.
 Local preview: `python3 -m http.server 8765`, then open http://localhost:8765
@@ -128,3 +133,13 @@ When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HH
   - the blink order was recorded as 1@12.0 s, 2@12.6 s, 1@13.1 s, 0@13.7 s
   - no console errors
 - **Next:** playtest again and time both the first lamp tap and the full solve. The risk is now the other way: if testers never notice the blink, the 35/60 s hints need to arrive sooner.
+
+### 2026-10-18: Peer playtest 4 (Phase 1)
+
+- **Observed (relayed by the Developer):** "much better, varied for all playtesters and was a challenge this time."
+- **Interpretation:** the 4-step pattern produces a real but solvable challenge, and solve times now spread across testers rather than clustering at 2–3 s. No further pacing changes for Phase 1.
+- **Carry to Phase 2:** apply the same lessons to stories 2–3:
+  - the payoff names itself (unlock card)
+  - triggers can't be solved by sweeping
+  - clues live in the scene, and text hints come later
+  - nothing that looks interactive is decoration only
