@@ -61,8 +61,10 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 - *During the story:* all other taps are disabled. When it ends, an "all clear" chime and fade return to the explore state, and the story can be replayed.
 
 **Goal and progress (revised 2026-10-18 after the phone test; see plan.md).**
-- The start screen states the goal: "The lab is hiding 3 secrets. Can you wake them?"
-- A "Secrets n/3" badge sits top-left. Each story counts once, and replays don't add to it.
+- The start screen states the goal, and a "Secrets n/N" badge sits top-left. Each story counts once, and replays don't add to it.
+- N = `SECRET_TOTAL` in `js/main.js`.
+  - **Phase 1: N = 1.** The Developer's call (2026-10-18), so playtesters don't hunt for stories that don't exist yet. The goal reads "The lab is hiding a secret. Can you wake it?"
+  - **Phase 2:** set N = 3. The goal becomes "…3 secrets…", and the found message switches between "the city is hiding more" and "You woke the lab!".
 
 **Hints (progressive, never instructions).**
 - *In-scene hint:* every 10 s (every 20 s once found), while no lamp is lit, the lamps softly glow top→bottom with quiet beeps.
@@ -73,7 +75,7 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 - *Reaction messages:*
   - wrong lamp: "Wrong order… the alarm system reset." (3 s)
   - mid-progress: "The lab noticed you… keep going."
-  - story done: "Secret found! The city is hiding more…" (4 s)
+  - story done: "Secret found! The city is hiding more…" while some remain, or "You woke the lab! Tap the lights again to replay." once all are found (4 s)
   - after that: "The lab is resetting… it might breach again." (15 s idle)
 - Each correct lamp pops a "1/3", "2/3" or "3/3" pip.
 

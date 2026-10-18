@@ -478,17 +478,27 @@ function updateHints() {
 }
 
 // ============================================================
-// Secrets counter: one secret per story (Phase 2 adds two more)
+// Secrets counter: one secret per story.
+// SECRET_TOTAL drives the badge, the start-screen goal and the found message.
+// Phase 1 ships one story; set this to 3 when the other stories exist.
 // ============================================================
+const SECRET_TOTAL = 1;
 const foundSecrets = new Set();
 const secretsEl = document.getElementById('secrets');
+
+document.getElementById('secrets-total').textContent = SECRET_TOTAL;
+document.getElementById('goal').innerHTML = SECRET_TOTAL === 1
+  ? 'The lab is hiding <strong>a secret</strong>.<br>Can you wake it?'
+  : `The lab is hiding <strong>${SECRET_TOTAL} secrets</strong>.<br>Can you wake them?`;
 
 function revealSecret(id) {
   if (foundSecrets.has(id)) return; // replays don't count twice
   foundSecrets.add(id);
   document.getElementById('secrets-count').textContent = foundSecrets.size;
   react(secretsEl, 'is-new', 1200);
-  flashHint('Secret found! The city is hiding more…', 4000);
+  flashHint(foundSecrets.size < SECRET_TOTAL
+    ? 'Secret found! The city is hiding more…'
+    : 'You woke the lab! Tap the lights again to replay.', 4000);
 }
 
 // ---------- Dev shortcuts ----------
