@@ -236,6 +236,7 @@ document.getElementById('enter-btn').addEventListener('click', () => {
   stage.dataset.state = 'explore';
   hints.idleSince = clock.now;
   scheduleAmbientEvent();
+  after(4000, playLampPattern, 'pattern');
   $('.lamp').focus({ preventScroll: true });
 });
 document.getElementById('credits-btn').addEventListener('click', () => {
@@ -253,13 +254,19 @@ document.getElementById('credits-close').addEventListener('click', () => {
 // Props: every tap gives unique audiovisual feedback
 // ============================================================
 
-// Restart a one-shot CSS reaction even if it is tapped again mid-animation
+// Restart a one-shot CSS reaction even if it is tapped again mid-animation.
+// The cleanup timer is keyed per element + class, so reacting several elements at once
+// (e.g. all three lamps) never cancels another element's cleanup.
+const reactKeys = new WeakMap();
+let nextReactKey = 0;
 function react(el, cls = 'is-reacting', ms = 1600) {
+  if (!reactKeys.has(el)) reactKeys.set(el, ++nextReactKey);
+  const tag = `react-${reactKeys.get(el)}-${cls}`;
   el.classList.remove(cls);
   void el.offsetWidth; // force reflow so the animation restarts
   el.classList.add(cls);
-  cancelTimers('react-' + el.dataset.prop + cls);
-  after(ms, () => el.classList.remove(cls), 'react-' + el.dataset.prop + cls);
+  cancelTimers(tag);
+  after(ms, () => el.classList.remove(cls), tag);
 }
 
 const propHandlers = {
@@ -275,6 +282,8 @@ $$('.prop').forEach((el) => {
   el.addEventListener('click', () => {
     // Taps are ignored while paused or while a story plays (CSS also blocks pointer events)
     if (!isRunning() || stage.dataset.state !== 'explore') return;
+    // Exploring the wrong things brings the next hint sooner
+    if (el.dataset.prop !== 'lamp') hints.nudges++;
     propHandlers[el.dataset.prop]?.(el);
   });
 });
@@ -292,14 +301,30 @@ function onLampTap(el) {
     el.classList.add('is-lit');
     sfx.lampBeep(index);
     lampProgress++;
+    el.querySelector('.lamp-pip').textContent = lampProgress + '/3';
     hints.idleSince = clock.now; // progress counts as activity
+    hints.nudges = 0;
     if (lampProgress === 3) after(450, startLabBreach, 'story');
   } else if (!el.classList.contains('is-lit')) {
     // Wrong lamp: buzz, blink all lamps amber, reset progress
     sfx.wrong();
     resetLamps();
     lamps.forEach((l) => react(l, 'is-wrong', 700));
+    flashHint('Wrong order… the alarm system reset.', 3000);
   }
+}
+
+// Diegetic pattern hint: lamps glow softly top → bottom every few seconds,
+// only while no lamp has been lit (so it never fights the player's own progress)
+function playLampPattern() {
+  if (stage.dataset.state === 'explore' && lampProgress === 0) {
+    lamps.forEach((l, i) => after(i * 320, () => {
+      if (lampProgress !== 0 || stage.dataset.state !== 'explore') return;
+      react(l, 'is-hinting', 700);
+      tone({ freq: [523, 659, 784][i], type: 'sine', dur: 0.15, gain: 0.035 });
+    }, 'pattern'));
+  }
+  after(foundSecrets.size ? 20000 : 10000, playLampPattern, 'pattern');
 }
 
 function resetLamps() {
@@ -405,36 +430,65 @@ function endLabBreach() {
   stage.dataset.state = 'explore';
   hints.level = 0;
   hints.idleSince = clock.now;
+  hints.nudges = 0;
   hints.storiesSeen++;
+  revealSecret('lab-breach');
   $('.lamp').focus({ preventScroll: true });
 }
 
 // ============================================================
 // Progressive hints: appear after idle time without story progress
 // ============================================================
+// "Effective idle" = time since last progress + 5s for every tap on a non-trigger prop,
+// so players who tap around get help sooner than players who just watch.
 const hintEl = document.getElementById('hint');
 const HINTS = [
-  { after: 20000, text: 'Something in the lab is blinking…' },
-  { after: 45000, text: 'Warning lights like to follow a pattern.' },
-  { after: 75000, text: 'Alarms usually start at the top…' },
+  { after: 8000, text: 'Something in the lab keeps blinking…' },
+  { after: 22000, text: 'Those lab lights seem to blink in a certain order.' },
+  { after: 40000, text: 'Alarms usually start at the top…' },
 ];
-const hints = { idleSince: 0, level: 0, storiesSeen: 0 };
+const NUDGE_MS = 5000;
+const hints = { idleSince: 0, nudges: 0, storiesSeen: 0, flash: null };
 
 function setHint(text) {
   if (hintEl.textContent !== text) hintEl.textContent = text;
 }
 
+// A short reaction message that temporarily replaces the progressive hint
+function flashHint(text, ms) {
+  hints.flash = { text, until: clock.now + ms };
+}
+
 function updateHints() {
   if (stage.dataset.state !== 'explore') return;
-  const idle = clock.now - hints.idleSince;
+  if (hints.flash && clock.now < hints.flash.until) return setHint(hints.flash.text);
+  hints.flash = null;
+
+  // Mid-trigger: encourage without telling
+  if (lampProgress > 0) return setHint('The lab noticed you… keep going.');
+
+  const idle = clock.now - hints.idleSince + hints.nudges * NUDGE_MS;
   // After the story has played once, only a gentle replay nudge appears
   if (hints.storiesSeen > 0) {
-    setHint(idle > 15000 ? 'The lab is resetting… it might breach again.' : '');
-    return;
+    return setHint(idle > 15000 ? 'The lab is resetting… it might breach again.' : '');
   }
   let text = '';
   HINTS.forEach((h) => { if (idle >= h.after) text = h.text; });
   setHint(text);
+}
+
+// ============================================================
+// Secrets counter: one secret per story (Phase 2 adds two more)
+// ============================================================
+const foundSecrets = new Set();
+const secretsEl = document.getElementById('secrets');
+
+function revealSecret(id) {
+  if (foundSecrets.has(id)) return; // replays don't count twice
+  foundSecrets.add(id);
+  document.getElementById('secrets-count').textContent = foundSecrets.size;
+  react(secretsEl, 'is-new', 1200);
+  flashHint('Secret found! The city is hiding more…', 4000);
 }
 
 // ---------- Dev shortcuts ----------

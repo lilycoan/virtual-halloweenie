@@ -40,6 +40,28 @@ Local preview: `python3 -m http.server 8765`, then open http://localhost:8765
 
 Record non-identifying playtest observations, separating what Users did or said from your interpretation. Use the findings to choose revision priorities and record what changed and how you verified the improvement.
 
+### 2026-10-18: Developer phone test (iPhone)
+
+- **Observed:** the app works on the phone and the sound is good. "It's unclear what I'm supposed to do… I just tap some stuff and lights flicker, but nothing indicates what to do or is intuitive."
+- **Causes found in the code:**
+  1. No stated goal.
+  2. The trigger lamps look exactly like the other props.
+  3. The first hint waited 20 s and ignored taps on other props.
+  4. Other props gave no sign that they weren't progress.
+- **Revision (Developer approved all four):**
+  1. A goal line on the start screen plus a "Secrets 0/3" badge.
+  2. The lamps softly blink the top→bottom pattern every 10 s while no lamp is lit.
+  3. Hints come earlier (8/22/40 s), each non-lamp tap counts as +5 s, and there are reaction messages for a wrong order, mid-progress and a found secret.
+  4. A "1/3" pip pops from each correctly lit lamp.
+- Also fixed `react()` cleanup timers, which were keyed by prop name, so the three lamps cancelled each other's cleanup. They're now keyed per element.
+- **Verified (Agent, CDP):**
+  - the pattern runs at 4 s, and hint 1 appears at 8.7 s
+  - 3 non-lamp taps jump straight to hint 2
+  - a wrong order shows its message, and all lamp classes are cleaned up afterward
+  - the pip shows "1/3"
+  - the counter goes to 1/3 after the story, and a replay doesn't double-count
+- **Developer:** needs to re-test on the phone. Next step: a peer playtest without any explanation.
+
 Keep implementation progress and verification here. Update `research.md` when evidence changes a decision and `spec.md` when intended behavior changes; link to those updates rather than duplicating them. Record consequential changes, not every small adjustment.
 
 ## Saving transcripts

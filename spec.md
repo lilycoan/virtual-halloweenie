@@ -60,12 +60,22 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
   - End (6–8s): a white "decontamination" flash and whoosh pull the gas and zombies back into the lab, the doors slam, and the lights return to normal.
 - *During the story:* all other taps are disabled. When it ends, an "all clear" chime and fade return to the explore state, and the story can be replayed.
 
-**Hints (progressive, never instructions).** A text strip at the bottom shows each hint after this much idle time without progress:
-- 20s: "Something in the lab is blinking…"
-- 45s: "Warning lights like to follow a pattern."
-- 75s: "Alarms usually start at the top…"
+**Goal and progress (revised 2026-10-18 after the phone test; see plan.md).**
+- The start screen states the goal: "The lab is hiding 3 secrets. Can you wake them?"
+- A "Secrets n/3" badge sits top-left. Each story counts once, and replays don't add to it.
 
-Hints reset after the story plays. After that, a replay nudge appears following 15s idle.
+**Hints (progressive, never instructions).**
+- *In-scene hint:* every 10 s (every 20 s once found), while no lamp is lit, the lamps softly glow top→bottom with quiet beeps.
+- *Text hints:* they appear by "effective idle", which is the time since last progress plus 5 s per non-lamp tap:
+  - 8 s: "Something in the lab keeps blinking…"
+  - 22 s: "Those lab lights seem to blink in a certain order."
+  - 40 s: "Alarms usually start at the top…"
+- *Reaction messages:*
+  - wrong lamp: "Wrong order… the alarm system reset." (3 s)
+  - mid-progress: "The lab noticed you… keep going."
+  - story done: "Secret found! The city is hiding more…" (4 s)
+  - after that: "The lab is resetting… it might breach again." (15 s idle)
+- Each correct lamp pops a "1/3", "2/3" or "3/3" pip.
 
 **Accessibility.** Every interactive prop is a focusable `<button>` with an aria-label, and Enter/Space activate it. Visible focus rings. Text ≥16px with contrast ≥4.5:1. Tap targets ≥44px.
 

@@ -34,9 +34,9 @@
       <div class="beacon" style="--x:50.2; --y:14.9; --w:16" aria-hidden="true"></div>
 
       <!-- Story 1 trigger: three warning lights on the lab's white facade strip -->
-      <button class="prop lamp" data-prop="lamp" data-index="0" style="--x:50; --y:31; --w:13" aria-label="Top warning light"><span class="lamp-bulb"></span></button>
-      <button class="prop lamp" data-prop="lamp" data-index="1" style="--x:50; --y:39.5; --w:13" aria-label="Middle warning light"><span class="lamp-bulb"></span></button>
-      <button class="prop lamp" data-prop="lamp" data-index="2" style="--x:50; --y:48; --w:13" aria-label="Bottom warning light"><span class="lamp-bulb"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="0" data-pip="1/3" style="--x:50; --y:31; --w:13" aria-label="Top warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="1" data-pip="2/3" style="--x:50; --y:39.5; --w:13" aria-label="Middle warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="2" data-pip="3/3" style="--x:50; --y:48; --w:13" aria-label="Bottom warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
 
       <!-- Moon -->
       <button class="prop moon" data-prop="moon" style="--x:79.6; --y:9.1; --w:14" aria-label="Moon"><span class="moon-glow"></span></button>
@@ -84,6 +84,7 @@
         <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
         <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 L19 12 L8 19 Z"/></svg>
       </button>
+      <p id="secrets" class="secrets" aria-live="polite"><span class="secrets-icon" aria-hidden="true">✦</span><span>Secrets <span id="secrets-count">0</span>/3</span></p>
       <p class="paused-label" aria-hidden="true">Paused</p>
       <p id="hint" class="hint" role="status" aria-live="polite"></p>
     </div>
@@ -92,7 +93,8 @@
     <section id="start-screen" class="start-screen" aria-labelledby="title">
       <p class="kicker">Virtual Hallo"weenie"</p>
       <h1 id="title">Lab Breach</h1>
-      <p class="tagline">The city is empty. The lab is still humming.<br>Explore… and see what wakes up.</p>
+      <p class="tagline">The city is empty. The lab is still humming.</p>
+      <p class="goal">The lab is hiding <strong>3 secrets</strong>.<br>Can you wake them?</p>
       <button id="enter-btn" class="enter-btn">Enter</button>
       <p class="sound-note">Best with sound on 🔊</p>
       <button id="credits-btn" class="text-btn">Credits</button>
