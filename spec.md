@@ -60,11 +60,15 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
   - End (6–8s): a white "decontamination" flash and whoosh pull the gas and zombies back into the lab, the doors slam, and the lights return to normal.
 - *During the story:* all other taps are disabled. When it ends, an "all clear" chime and fade return to the explore state, and the story can be replayed.
 
-**Goal and progress (revised 2026-10-18 after the phone test; see plan.md).**
+**Goal and progress (revised twice on 2026-10-18; see plan.md, peer playtest 1).**
+- Framing: "Something is sealed inside the lab. Can you wake it up?" The badge reads "Lab events n/N". *Replaced the earlier "secrets" wording, which testers misread.*
+- On the first completion of a story, a center **UNLOCKED: [story]** card appears with a chime, then flies into the badge.
+- Shared prop rule: every non-trigger prop tap ends by blinking the lamp pattern. The lab door reads "ACCESS DENIED / CHECK ALARM LIGHTS ↑".
+- Unlit lamps show a ripple ring as a tap affordance.
 - The start screen states the goal, and a "Secrets n/N" badge sits top-left. Each story counts once, and replays don't add to it.
-- N = `SECRET_TOTAL` in `js/main.js`.
-  - **Phase 1: N = 1.** The Developer's call (2026-10-18), so playtesters don't hunt for stories that don't exist yet. The goal reads "The lab is hiding a secret. Can you wake it?"
-  - **Phase 2:** set N = 3. The goal becomes "…3 secrets…", and the found message switches between "the city is hiding more" and "You woke the lab!".
+- N = `EVENT_TOTAL` in `js/main.js`.
+  - **Phase 1: N = 1.** The Developer's call (2026-10-18), so playtesters don't hunt for stories that don't exist yet. 
+  - **Phase 2:** set N = 3. The goal becomes "…wake all 3 events?", and the found message switches between "the city is hiding more" and "You woke the lab!".
 
 **Hints (progressive, never instructions).**
 - *In-scene hint:* every 10 s (every 20 s once found), while no lamp is lit, the lamps softly glow top→bottom with quiet beeps.

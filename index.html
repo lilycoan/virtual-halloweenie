@@ -58,7 +58,7 @@
       </button>
 
       <!-- Lab entrance at the end of the road -->
-      <button class="prop lab-door" data-prop="door" style="--x:50; --y:66.2; --w:13" aria-label="Lab entrance"><span class="door-glow"></span><span class="door-text">ACCESS DENIED</span></button>
+      <button class="prop lab-door" data-prop="door" style="--x:50; --y:66.2; --w:13" aria-label="Lab entrance"><span class="door-glow"></span><span class="door-text">ACCESS DENIED<br>CHECK ALARM LIGHTS ↑</span></button>
     </div>
 
     <!-- 5. Front fog + blowing debris + crows flying across the sky -->
@@ -84,7 +84,13 @@
         <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
         <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 L19 12 L8 19 Z"/></svg>
       </button>
-      <p id="secrets" class="secrets" aria-live="polite"><span class="secrets-icon" aria-hidden="true">✦</span><span>Secrets <span id="secrets-count">0</span>/<span id="secrets-total">1</span></span></p>
+      <p id="events" class="events" aria-live="polite"><span class="events-icon" aria-hidden="true">✦</span><span>Lab events <span id="events-count">0</span>/<span id="events-total">1</span></span></p>
+      <!-- Unlock card: the payoff after a story is completed for the first time -->
+      <div id="unlock-card" class="unlock-card" hidden role="status">
+        <p class="unlock-kicker">✦ Unlocked</p>
+        <p class="unlock-title" id="unlock-title"></p>
+        <p class="unlock-count" id="unlock-count"></p>
+      </div>
       <p class="paused-label" aria-hidden="true">Paused</p>
       <p id="hint" class="hint" role="status" aria-live="polite"></p>
     </div>
@@ -94,7 +100,7 @@
       <p class="kicker">Virtual Hallo"weenie"</p>
       <h1 id="title">Lab Breach</h1>
       <p class="tagline">The city is empty. The lab is still humming.</p>
-      <p class="goal" id="goal">The lab is hiding <strong>a secret</strong>.<br>Can you wake it?</p>
+      <p class="goal" id="goal"></p>
       <button id="enter-btn" class="enter-btn">Enter</button>
       <p class="sound-note">Best with sound on 🔊</p>
       <button id="credits-btn" class="text-btn">Credits</button>

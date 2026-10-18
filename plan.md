@@ -67,3 +67,25 @@ Keep implementation progress and verification here. Update `research.md` when ev
 ## Saving transcripts
 
 When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HHMMSS.md` or `transcripts/build-YYYY-MM-DD_HHMMSS.md`, label messages `Developer` and `Agent`, and confirm the path.
+
+### 2026-10-18: Peer playtest 1 (Phase 1)
+
+- **Observed (relayed by the Developer):**
+  - Testers tapped everything but were unsure how to "find secrets". Apart from the containment breach, "nothing seems to happen."
+  - After getting frustrated they asked, "how do you reveal [a] secret?"
+  - Follow-up from the Developer: testers *did* trigger the breach but didn't realize it was the secret. They noticed the other props' reactions, but those felt pointless.
+- **Interpretation:**
+  1. The word "secret" set an expectation of a hidden reveal, which didn't match the show that plays.
+  2. The "found" signal was small and in the wrong place: the bottom hint strip after the story, plus a corner badge.
+  3. The non-trigger props were dead ends.
+- **Revision (Developer approved):**
+  1. New framing: "Something is sealed inside the lab. Can you wake it up?", with the badge renamed to "Lab events n/N".
+  2. A center **UNLOCKED: Lab Breach** card with a chime that flies into the badge on the first completion.
+  3. A **shared rule**: every non-lamp prop tap ends by blinking the lamp pattern, and the lab door reads "ACCESS DENIED / CHECK ALARM LIGHTS ↑".
+  4. A ripple ring on unlit lamps as a "tap me" affordance (a static ring in reduced motion).
+- **Verified (Agent, CDP):**
+  - a door tap shows the clue and then blinks the lamps
+  - the card shows after the story, then hides at 3.4 s
+  - the badge goes from 0/1 to 1/1, and a replay shows no card and no double count
+  - no console errors
+- **Next:** re-run the peer playtest with new testers. Watch whether they connect the breach to the goal, and how long it takes them to first tap a lamp.

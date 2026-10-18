@@ -283,8 +283,14 @@ $$('.prop').forEach((el) => {
     // Taps are ignored while paused or while a story plays (CSS also blocks pointer events)
     if (!isRunning() || stage.dataset.state !== 'explore') return;
     // Exploring the wrong things brings the next hint sooner
-    if (el.dataset.prop !== 'lamp') hints.nudges++;
     propHandlers[el.dataset.prop]?.(el);
+    if (el.dataset.prop !== 'lamp') {
+      // Exploring other things brings the next hint sooner…
+      hints.nudges++;
+      // …and every non-lamp reaction ends by drawing the eye to the lamps (shared rule)
+      cancelTimers('blink');
+      after(Number(el.dataset.pointDelay || 700), blinkLamps, 'blink');
+    }
   });
 });
 
@@ -314,17 +320,21 @@ function onLampTap(el) {
   }
 }
 
-// Diegetic pattern hint: lamps glow softly top → bottom every few seconds,
-// only while no lamp has been lit (so it never fights the player's own progress)
+// Diegetic pattern hint: the lamps glow softly top → bottom with quiet beeps.
+// Runs only while no lamp is lit, so it never fights the player's own progress.
+function blinkLamps() {
+  if (stage.dataset.state !== 'explore' || lampProgress !== 0) return;
+  lamps.forEach((l, i) => after(i * 320, () => {
+    if (lampProgress !== 0 || stage.dataset.state !== 'explore') return;
+    react(l, 'is-hinting', 700);
+    tone({ freq: [523, 659, 784][i], type: 'sine', dur: 0.15, gain: 0.035 });
+  }, 'blink-step'));
+}
+
+// Repeats on its own: every 10s until the event is found, then every 20s
 function playLampPattern() {
-  if (stage.dataset.state === 'explore' && lampProgress === 0) {
-    lamps.forEach((l, i) => after(i * 320, () => {
-      if (lampProgress !== 0 || stage.dataset.state !== 'explore') return;
-      react(l, 'is-hinting', 700);
-      tone({ freq: [523, 659, 784][i], type: 'sine', dur: 0.15, gain: 0.035 });
-    }, 'pattern'));
-  }
-  after(foundSecrets.size ? 20000 : 10000, playLampPattern, 'pattern');
+  blinkLamps();
+  after(foundEvents.size ? 20000 : 10000, playLampPattern, 'pattern');
 }
 
 function resetLamps() {
@@ -432,7 +442,7 @@ function endLabBreach() {
   hints.idleSince = clock.now;
   hints.nudges = 0;
   hints.storiesSeen++;
-  revealSecret('lab-breach');
+  revealEvent('lab-breach', 'Lab Breach');
   $('.lamp').focus({ preventScroll: true });
 }
 
@@ -478,27 +488,42 @@ function updateHints() {
 }
 
 // ============================================================
-// Secrets counter: one secret per story.
-// SECRET_TOTAL drives the badge, the start-screen goal and the found message.
+// Lab events counter: one event per story.
+// EVENT_TOTAL drives the badge, the start-screen goal, the unlock card and the found message.
 // Phase 1 ships one story; set this to 3 when the other stories exist.
 // ============================================================
-const SECRET_TOTAL = 1;
-const foundSecrets = new Set();
-const secretsEl = document.getElementById('secrets');
+const EVENT_TOTAL = 1;
+const foundEvents = new Set();
+const eventsEl = document.getElementById('events');
+const unlockCard = document.getElementById('unlock-card');
 
-document.getElementById('secrets-total').textContent = SECRET_TOTAL;
-document.getElementById('goal').innerHTML = SECRET_TOTAL === 1
-  ? 'The lab is hiding <strong>a secret</strong>.<br>Can you wake it?'
-  : `The lab is hiding <strong>${SECRET_TOTAL} secrets</strong>.<br>Can you wake them?`;
+document.getElementById('events-total').textContent = EVENT_TOTAL;
+document.getElementById('goal').innerHTML = EVENT_TOTAL === 1
+  ? 'Something is sealed inside the lab.<br><strong>Can you wake it up?</strong>'
+  : `Something is sealed inside the lab.<br><strong>Can you wake all ${EVENT_TOTAL} events?</strong>`;
 
-function revealSecret(id) {
-  if (foundSecrets.has(id)) return; // replays don't count twice
-  foundSecrets.add(id);
-  document.getElementById('secrets-count').textContent = foundSecrets.size;
-  react(secretsEl, 'is-new', 1200);
-  flashHint(foundSecrets.size < SECRET_TOTAL
-    ? 'Secret found! The city is hiding more…'
-    : 'You woke the lab! Tap the lights again to replay.', 4000);
+function revealEvent(id, title) {
+  if (foundEvents.has(id)) {
+    flashHint('The lab is resetting… it might breach again.', 3000);
+    return; // replays don't count twice
+  }
+  foundEvents.add(id);
+  // Payoff: center card pops in, then flies into the badge, which then ticks up
+  document.getElementById('unlock-title').textContent = title;
+  document.getElementById('unlock-count').textContent = `Lab events ${foundEvents.size}/${EVENT_TOTAL}`;
+  unlockCard.hidden = false;
+  unlockCard.style.animation = 'none';
+  void unlockCard.offsetWidth;
+  unlockCard.style.animation = '';
+  sfx.allClear();
+  after(3400, () => {
+    unlockCard.hidden = true;
+    document.getElementById('events-count').textContent = foundEvents.size;
+    react(eventsEl, 'is-new', 1200);
+    flashHint(foundEvents.size < EVENT_TOTAL
+      ? 'Something else in the city is stirring…'
+      : 'You woke the lab! Tap the lights again to replay.', 4500);
+  }, 'unlock');
 }
 
 // ---------- Dev shortcuts ----------
