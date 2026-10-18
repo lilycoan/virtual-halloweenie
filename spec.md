@@ -31,7 +31,8 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 
 **Scene (one portrait screen, no scrolling).**
 - Focal point: the lab tower, centered in the upper-middle with a beacon on top and three warning lights on its facade.
-- Environmental features: (1) a crumbling skyline on both sides, (2) a street with an abandoned car or bus, (3) a broken streetlight and neon sign, (4) a barricade or caution tape in the foreground.
+- Environmental features (painted): (1) overgrown ruined skyscrapers framing both sides, (2) a cracked, weedy road leading to the lab, (3) two streetlights, (4) the moon and toxic-green sky. *Revised 2026-10-16: props are light/silhouette overlays on painted features (see research.md).*
+- Tappable props: the 3 warning lamps (trigger), the moon (glow + owl hoot), the crows (they flee and return + caw), the left streetlight (sparks + blackout + zap), the right streetlight (power surge + hum), and the lab door ("ACCESS DENIED" + two-tone beep).
 - Art: hybrid. The background is AI-painted by the Developer. Props, lights and effects are SVG/CSS layered on top by the Agent.
 
 **Layers (back to front).** Sky and background image → distant shamblers → fog (back) → interactive props → fog (front) and debris → story FX → UI (hint text, Play/Pause).
@@ -42,7 +43,7 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 
 **Ambient audio.** Looping wind with distant groans and an occasional far-off siren. Every file must be CC0 or public domain, with its source and terms verified in `research.md`.
 
-**Global states.** `start` → `explore` ⇄ `paused`, and `explore` → `story` → `explore`. One shared clock and a pause flag control all animation (CSS `animation-play-state` plus a JS loop), all audio, the hint timers and input.
+**Global states.** `start` → `explore` → `story` → `explore`, with a separate pause flag, so a story can be paused mid-way. Pressing P also toggles pause, and the app auto-pauses when hidden. One shared clock and a pause flag control all animation (CSS `animation-play-state` plus a JS loop), all audio, the hint timers and input.
 
 **Start screen.** Title, one-line premise, Enter button, and credits link. Enter unlocks audio and starts the scene. If `prefers-reduced-motion` is set, the fog, debris and shamblers are static or very slow, there are no flashes or shakes, and the story uses fades instead.
 
@@ -61,10 +62,10 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 
 **Hints (progressive, never instructions).** A text strip at the bottom shows each hint after this much idle time without progress:
 - 20s: "Something in the lab is blinking…"
-- 45s: "Warning lights have a pattern."
-- 75s: "Alarms usually go off from the top down."
+- 45s: "Warning lights like to follow a pattern."
+- 75s: "Alarms usually start at the top…"
 
-Hints reset after the story plays.
+Hints reset after the story plays. After that, a replay nudge appears following 15s idle.
 
 **Accessibility.** Every interactive prop is a focusable `<button>` with an aria-label, and Enter/Space activate it. Visible focus rings. Text ≥16px with contrast ≥4.5:1. Tap targets ≥44px.
 

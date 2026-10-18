@@ -3,124 +3,142 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#140b26">
+  <meta name="theme-color" content="#1a1430">
   <title>Virtual Hallo"weenie": Lab Breach</title>
+  <link rel="preload" href="assets/img/bg-city.jpg" as="image">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <!-- The stage is a fixed 9:19.5 frame. Every layer inside is positioned in % of it,
-       so overlays stay aligned with the background on any phone size. -->
+       so overlays stay aligned with the background painting on any phone size. -->
   <main id="stage" class="stage" data-state="start">
 
     <!-- 1. Background painting -->
     <img class="layer layer-bg" src="assets/img/bg-city.jpg" alt="" aria-hidden="true">
 
-    <!-- 2. Distant shamblers (ambient, filled in checkpoint 3) -->
-    <div class="layer layer-shamblers" aria-hidden="true"></div>
-
-    <!-- 3. Back fog -->
-    <div class="layer layer-fog-back" aria-hidden="true"></div>
-
-    <!-- 4. Interactive props. Each one is a real <button> for keyboard and screen-reader support.
-         --x/--y = center point in % of the stage. --w = width in % of the stage width. -->
-    <div class="layer layer-props">
-      <!-- Lab beacon (not interactive; pulses as an ambient effect) -->
-      <div class="beacon" style="--x:50; --y:19.2; --w:10" aria-hidden="true">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="22" fill="#5ef2c9"/><rect x="30" y="72" width="40" height="14" rx="3" fill="#9fb7c9"/></svg>
-      </div>
-
-      <!-- Story 1 trigger: three facade warning lights -->
-      <button class="prop lamp" data-prop="lamp" data-index="0" style="--x:50; --y:34.9; --w:13" aria-label="Top warning light">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="24" class="lamp-bulb"/><circle cx="50" cy="50" r="24" fill="none" stroke="#9fb7c9" stroke-width="6"/></svg>
-      </button>
-      <button class="prop lamp" data-prop="lamp" data-index="1" style="--x:50; --y:42.6; --w:13" aria-label="Middle warning light">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="24" class="lamp-bulb"/><circle cx="50" cy="50" r="24" fill="none" stroke="#9fb7c9" stroke-width="6"/></svg>
-      </button>
-      <button class="prop lamp" data-prop="lamp" data-index="2" style="--x:50; --y:50.3; --w:13" aria-label="Bottom warning light">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="24" class="lamp-bulb"/><circle cx="50" cy="50" r="24" fill="none" stroke="#9fb7c9" stroke-width="6"/></svg>
-      </button>
-
-      <!-- Crows perched on the left rooftop -->
-      <button class="prop crows" data-prop="crows" style="--x:10; --y:25.4; --w:18" aria-label="Crows on the rooftop">
-        <svg viewBox="0 0 160 80">
-          <g fill="#07060b">
-            <path d="M20 70 q0 -26 18 -30 q10 -2 14 6 l10 -2 l-8 8 q2 18 -14 20 z"/>
-            <path d="M90 70 q0 -24 16 -28 q10 -2 13 6 l10 -1 l-8 7 q2 16 -12 18 z"/>
-          </g>
-          <g fill="#8fd16a"><circle cx="46" cy="46" r="2.5"/><circle cx="112" cy="48" r="2.5"/></g>
-        </svg>
-      </button>
-
-      <!-- Neon sign on the left building (letters flicker) -->
-      <button class="prop neon" data-prop="neon" style="--x:12; --y:56.4; --w:22" aria-label="Broken neon diner sign">
-        <svg viewBox="0 0 200 90">
-          <rect x="4" y="4" width="192" height="82" rx="10" fill="#14101c" stroke="#ff4fa3" stroke-width="5"/>
-          <text x="100" y="62" text-anchor="middle" class="neon-text">D<tspan class="neon-dead">I</tspan>NER</text>
-        </svg>
-      </button>
-
-      <!-- Broken streetlight on the right -->
-      <button class="prop streetlight" data-prop="streetlight" style="--x:83; --y:69; --w:22" aria-label="Flickering streetlight">
-        <svg viewBox="0 0 200 440">
-          <path d="M150 440 L150 40 Q150 20 120 20 L60 20" fill="none" stroke="#3c4250" stroke-width="12"/>
-          <path d="M30 14 h60 l-8 22 h-44 z" fill="#4a5163"/>
-          <ellipse cx="60" cy="40" rx="20" ry="8" class="streetlight-bulb"/>
-        </svg>
-      </button>
-
-      <!-- Abandoned car, lower left -->
-      <button class="prop car" data-prop="car" style="--x:24; --y:81; --w:40" aria-label="Abandoned car">
-        <svg viewBox="0 0 360 170">
-          <ellipse cx="180" cy="158" rx="170" ry="10" fill="#000" opacity="0.5"/>
-          <path d="M20 130 L30 90 Q40 72 70 70 L110 40 Q120 32 140 32 L240 32 Q262 32 274 46 L300 72 Q336 76 342 100 L345 130 Z" fill="#5b3b5f"/>
-          <path d="M120 46 L230 46 L262 74 L96 74 Z" fill="#1b2433"/>
-          <line x1="170" y1="46" x2="166" y2="74" stroke="#5b3b5f" stroke-width="6"/>
-          <path d="M126 50 l20 20 M200 52 l14 14" stroke="#7b9bb0" stroke-width="2"/>
-          <circle cx="90" cy="134" r="26" fill="#111"/><circle cx="90" cy="134" r="10" fill="#555"/>
-          <circle cx="280" cy="134" r="26" fill="#111"/><circle cx="280" cy="134" r="10" fill="#555"/>
-          <rect x="326" y="92" width="16" height="10" rx="3" class="car-light"/>
-        </svg>
-      </button>
-
-      <!-- Foreground barricade with caution stripes -->
-      <button class="prop barricade" data-prop="barricade" style="--x:72; --y:91.5; --w:46" aria-label="Road barricade">
-        <svg viewBox="0 0 400 150">
-          <defs>
-            <pattern id="stripes" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-              <rect width="20" height="40" fill="#f2c531"/><rect x="20" width="20" height="40" fill="#1a1a1a"/>
-            </pattern>
-          </defs>
-          <rect x="40" y="70" width="18" height="80" fill="#3a3a3a"/>
-          <rect x="342" y="70" width="18" height="80" fill="#3a3a3a"/>
-          <rect x="10" y="30" width="380" height="50" rx="6" fill="url(#stripes)" stroke="#111" stroke-width="4"/>
-          <circle cx="40" cy="20" r="12" class="barricade-light"/>
-        </svg>
-      </button>
+    <!-- 2. Distant shamblers walking on the far road -->
+    <div class="layer layer-shamblers" aria-hidden="true">
+      <div class="shambler" style="--x:42; --y:72.5; --w:5.2; --dur:26s; --delay:-4s"></div>
+      <div class="shambler" style="--x:55; --y:75; --w:6.2; --dur:34s; --delay:-19s"></div>
+      <div class="shambler" style="--x:50; --y:69.8; --w:4; --dur:30s; --delay:-11s"></div>
     </div>
 
-    <!-- 5. Front fog + debris (ambient, filled in checkpoint 3) -->
-    <div class="layer layer-fog-front" aria-hidden="true"></div>
-    <div class="layer layer-debris" aria-hidden="true"></div>
+    <!-- 3. Back fog (rolls across the road and the lab base) -->
+    <div class="layer layer-fog-back" aria-hidden="true"><div class="fog-strip"></div></div>
 
-    <!-- 6. Story FX (gas, zombies, flash) -->
-    <div class="layer layer-fx" aria-hidden="true"></div>
+    <!-- 4. Interactive props. Each one is a real <button> for keyboard and screen-reader support.
+         --x/--y = center point in % of the stage. --w = width in % of the stage width.
+         All visuals are light/silhouette overlays that sit on features painted in the background. -->
+    <div class="layer layer-props">
+      <!-- Lab beacon on the spire tip (ambient pulse; turns red during the story) -->
+      <div class="beacon" style="--x:50.2; --y:14.9; --w:16" aria-hidden="true"></div>
+
+      <!-- Story 1 trigger: three warning lights on the lab's white facade strip -->
+      <button class="prop lamp" data-prop="lamp" data-index="0" style="--x:50; --y:31; --w:13" aria-label="Top warning light"><span class="lamp-bulb"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="1" style="--x:50; --y:39.5; --w:13" aria-label="Middle warning light"><span class="lamp-bulb"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="2" style="--x:50; --y:48; --w:13" aria-label="Bottom warning light"><span class="lamp-bulb"></span></button>
+
+      <!-- Moon -->
+      <button class="prop moon" data-prop="moon" style="--x:79.6; --y:9.1; --w:14" aria-label="Moon"><span class="moon-glow"></span></button>
+
+      <!-- Crows perched on the left ruin's ledge -->
+      <button class="prop crows" data-prop="crows" style="--x:14; --y:16.4; --w:17" aria-label="Crows on the ruined building">
+        <svg viewBox="0 0 160 70" aria-hidden="true">
+          <g class="crow crow-a"><path d="M18 64 q0 -24 17 -28 q10 -2 13 6 l10 -2 l-8 8 q2 16 -13 18 z"/><circle cx="42" cy="42" r="2.4" class="crow-eye"/></g>
+          <g class="crow crow-b"><path d="M92 64 q0 -22 15 -26 q9 -2 12 6 l9 -1 l-7 7 q2 14 -11 16 z"/><circle cx="114" cy="44" r="2.2" class="crow-eye"/></g>
+        </svg>
+      </button>
+
+      <!-- Two painted streetlights: glow + light cone sit on each painted lamp head -->
+      <button class="prop streetlight streetlight-left" data-prop="streetlight-left" style="--x:31.4; --y:53.2; --w:16" aria-label="Left streetlight">
+        <span class="street-glow"></span><span class="street-cone"></span><span class="sparks"></span>
+      </button>
+      <button class="prop streetlight streetlight-right" data-prop="streetlight-right" style="--x:70.6; --y:55; --w:16" aria-label="Right streetlight">
+        <span class="street-glow"></span><span class="street-cone"></span>
+      </button>
+
+      <!-- Lab entrance at the end of the road -->
+      <button class="prop lab-door" data-prop="door" style="--x:50; --y:66.2; --w:13" aria-label="Lab entrance"><span class="door-glow"></span><span class="door-text">ACCESS DENIED</span></button>
+    </div>
+
+    <!-- 5. Front fog + blowing debris + crows flying across the sky -->
+    <div class="layer layer-fog-front" aria-hidden="true"><div class="fog-strip"></div></div>
+    <div class="layer layer-debris" aria-hidden="true">
+      <div class="paper paper-a"></div>
+      <div class="paper paper-b"></div>
+      <svg class="flyer" viewBox="0 0 60 24"><path d="M0 12 q14 -12 30 0 q16 -12 30 0 q-16 -4 -30 6 q-14 -10 -30 -6 z"/></svg>
+    </div>
+
+    <!-- 6. Story FX (Lab Breach). Hidden until the story runs. -->
+    <div class="layer layer-fx" aria-hidden="true">
+      <div class="alarm-vignette"></div>
+      <div class="gas-cloud" id="gas-cloud"></div>
+      <div class="zombie-crowd" id="zombie-crowd"></div>
+      <div class="decon-flash"></div>
+      <p class="story-banner" id="story-banner"></p>
+    </div>
 
     <!-- 7. UI -->
     <div class="layer layer-ui">
       <button id="pause-btn" class="pause-btn" aria-label="Pause" aria-pressed="false">
-        <span class="icon-pause" aria-hidden="true">❚❚</span>
+        <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 L19 12 L8 19 Z"/></svg>
       </button>
+      <p class="paused-label" aria-hidden="true">Paused</p>
       <p id="hint" class="hint" role="status" aria-live="polite"></p>
     </div>
 
     <!-- Start screen -->
     <section id="start-screen" class="start-screen" aria-labelledby="title">
+      <p class="kicker">Virtual Hallo"weenie"</p>
       <h1 id="title">Lab Breach</h1>
-      <p class="tagline">The city is empty. The lab is still humming.<br>Explore… if you dare.</p>
+      <p class="tagline">The city is empty. The lab is still humming.<br>Explore… and see what wakes up.</p>
       <button id="enter-btn" class="enter-btn">Enter</button>
       <p class="sound-note">Best with sound on 🔊</p>
+      <button id="credits-btn" class="text-btn">Credits</button>
+    </section>
+
+    <!-- Credits panel (opened from the start screen) -->
+    <section id="credits" class="credits" hidden aria-labelledby="credits-title">
+      <h2 id="credits-title">Credits</h2>
+      <p><strong>Developer:</strong> Lily Coan</p>
+      <p><strong>Background painting:</strong> AI-generated for this project by the Developer.</p>
+      <p><strong>Code, overlays &amp; synthesized sound effects:</strong> written for this project with Claude (Anthropic).</p>
+      <p><strong>Sounds (CC0, via Freesound.org):</strong></p>
+      <ul>
+        <li>"Ambient Wind *Real Wind*" by UnderlinedDesigns</li>
+        <li>"Crow Caw" by qubodup</li>
+        <li>"Crow SFX 9" by deadrobotmusic</li>
+        <li>"Zombie Groan 0" and "Zombie Groan 3" by OwNathan</li>
+        <li>"Zombie moan 3" by Breviceps</li>
+        <li>"Crowd Of Zombies Groaning, Increasing Intensity" by ShangusBurger</li>
+        <li>"siren police north american distant city echo" by kyles</li>
+      </ul>
+      <button id="credits-close" class="enter-btn small">Back</button>
     </section>
   </main>
+
+  <!-- Goofy cartoon zombie silhouette, cloned by JS for the story crowd -->
+  <template id="zombie-template">
+    <div class="zombie"><div class="zombie-body">
+      <svg viewBox="0 0 120 200" aria-hidden="true">
+        <!-- arms reaching forward -->
+        <path class="z-skin" d="M24 70 L-6 84 Q-12 88 -8 94 L-2 96 Q2 92 8 90 L34 84 Z"/>
+        <path class="z-skin" d="M96 70 L126 80 Q132 84 128 90 L122 92 Q118 88 112 86 L86 84 Z"/>
+        <!-- legs -->
+        <path class="z-pants" d="M36 130 L30 194 L50 194 L58 140 L64 140 L72 194 L92 194 L84 130 Z"/>
+        <!-- torn shirt -->
+        <path class="z-shirt" d="M30 64 Q60 54 90 64 L94 136 L84 130 L76 138 L66 130 L56 138 L46 130 L36 138 L26 134 Z"/>
+        <!-- head, tilted -->
+        <g transform="rotate(-10 60 40)">
+          <rect class="z-skin" x="36" y="10" width="48" height="50" rx="20"/>
+          <path class="z-hair" d="M38 22 Q44 4 60 8 Q72 2 82 18 L74 16 L70 22 L62 14 L54 22 L48 16 Z"/>
+          <circle class="z-eye" cx="51" cy="34" r="6"/><circle class="z-eye" cx="70" cy="32" r="4.5"/>
+          <path class="z-mouth" d="M50 48 Q60 54 72 46" />
+        </g>
+      </svg>
+    </div></div>
+  </template>
 
   <script src="js/main.js"></script>
 </body>
