@@ -35,17 +35,17 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 - Tappable props: the 3 warning lamps (trigger), the moon (glow + owl hoot), the crows (they flee and return + caw), the left streetlight (sparks + blackout + zap), the right streetlight (power surge + hum), and the lab door ("ACCESS DENIED" + two-tone beep).
 - Art: hybrid. The background is AI-painted by the Developer. Props, lights and effects are SVG/CSS layered on top by the Agent.
 
-**Layers (back to front).** Sky and background image → distant shamblers → fog (back) → interactive props → fog (front) and debris → story FX → UI (hint text, Play/Pause).
+**Layers (back to front).** Sky and background image → distant shamblers → fog (back) → interactive props → fog (front) and flying crow → story FX → UI (hint text, Play/Pause).
 
 **Layout model.** A single stage with a fixed portrait aspect ratio (9:19.5) that scales to fit the viewport and is centered. The leftover space is filled with the scene's sky color. Every layer and tap target is positioned in % of the stage, so the overlays stay aligned with the background on any phone.
 
-**Ambient effects (all four chosen).** Drifting green fog; flickering streetlight and neon; a slow pulse on the lab beacon; distant shambling silhouettes plus blowing newspapers and crows.
+**Ambient effects (all four chosen).** Drifting green fog; flickering streetlights; a slow pulse on the lab beacon; distant shambling silhouettes; a crow flying across the sky. *(Blowing newspapers were removed after playtest 2: testers took them for tappable objects.)*
 
 **Ambient audio.** Looping wind with distant groans and an occasional far-off siren. Every file must be CC0 or public domain, with its source and terms verified in `research.md`.
 
 **Global states.** `start` → `explore` → `story` → `explore`, with a separate pause flag, so a story can be paused mid-way. Pressing P also toggles pause, and the app auto-pauses when hidden. One shared clock and a pause flag control all animation (CSS `animation-play-state` plus a JS loop), all audio, the hint timers and input.
 
-**Start screen.** Title, one-line premise, Enter button, and credits link. Enter unlocks audio and starts the scene. If `prefers-reduced-motion` is set, the fog, debris and shamblers are static or very slow, there are no flashes or shakes, and the story uses fades instead.
+**Start screen.** Title, one-line premise, Enter button, and credits link. Enter unlocks audio and starts the scene. If `prefers-reduced-motion` is set, the fog, crow and shamblers are static or very slow, there are no flashes or shakes, and the story uses fades instead.
 
 **Play/Pause.** One small corner button (≥44px, keyboard-focusable, with `aria-pressed`). It freezes all motion, sound, timers and taps, including mid-story, and resumes exactly where things stopped.
 
@@ -63,7 +63,7 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 **Goal and progress (revised twice on 2026-10-18; see plan.md, peer playtest 1).**
 - Framing: "Something is sealed inside the lab. Can you wake it up?" The badge reads "Lab events n/N". *Replaced the earlier "secrets" wording, which testers misread.*
 - On the first completion of a story, a center **UNLOCKED: [story]** card appears with a chime, then flies into the badge.
-- Shared prop rule: every non-trigger prop tap ends by blinking the lamp pattern. The lab door reads "ACCESS DENIED / CHECK ALARM LIGHTS ↑".
+- Shared prop rule: every non-trigger prop tap ends by blinking the lamp pattern. The lamps answer only after 4 off-target taps, with a 15 s cooldown. The lab door reads "ACCESS DENIED". *Revised after playtest 2: the earlier version was too direct.*
 - Unlit lamps show a ripple ring as a tap affordance.
 - The start screen states the goal, and a "Secrets n/N" badge sits top-left. Each story counts once, and replays don't add to it.
 - N = `EVENT_TOTAL` in `js/main.js`.
@@ -71,11 +71,11 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
   - **Phase 2:** set N = 3. The goal becomes "…wake all 3 events?", and the found message switches between "the city is hiding more" and "You woke the lab!".
 
 **Hints (progressive, never instructions).**
-- *In-scene hint:* every 10 s (every 20 s once found), while no lamp is lit, the lamps softly glow top→bottom with quiet beeps.
-- *Text hints:* they appear by "effective idle", which is the time since last progress plus 5 s per non-lamp tap:
-  - 8 s: "Something in the lab keeps blinking…"
-  - 22 s: "Those lab lights seem to blink in a certain order."
-  - 40 s: "Alarms usually start at the top…"
+- *In-scene hint:* first at 12 s, then every 14 s (every 24 s once found), while no lamp is lit, the lamps softly glow top→bottom with quiet beeps.
+- *Text hints:* they appear by "effective idle", which is the time since last progress plus 1 s per non-lamp tap:
+  - 15 s: "Something in the lab keeps blinking…"
+  - 35 s: "Those lab lights seem to blink in a certain order."
+  - 60 s: "Alarms usually start at the top…"
 - *Reaction messages:*
   - wrong lamp: "Wrong order… the alarm system reset." (3 s)
   - mid-progress: "The lab noticed you… keep going."

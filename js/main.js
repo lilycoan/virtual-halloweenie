@@ -236,7 +236,7 @@ document.getElementById('enter-btn').addEventListener('click', () => {
   stage.dataset.state = 'explore';
   hints.idleSince = clock.now;
   scheduleAmbientEvent();
-  after(4000, playLampPattern, 'pattern');
+  after(FIRST_PATTERN_MS, playLampPattern, 'pattern');
   $('.lamp').focus({ preventScroll: true });
 });
 document.getElementById('credits-btn').addEventListener('click', () => {
@@ -285,11 +285,15 @@ $$('.prop').forEach((el) => {
     // Exploring the wrong things brings the next hint sooner
     propHandlers[el.dataset.prop]?.(el);
     if (el.dataset.prop !== 'lamp') {
-      // Exploring other things brings the next hint sooner…
+      // Exploring other things brings the next hint a little sooner…
       hints.nudges++;
-      // …and every non-lamp reaction ends by drawing the eye to the lamps (shared rule)
-      cancelTimers('blink');
-      after(Number(el.dataset.pointDelay || 700), blinkLamps, 'blink');
+      // …and only after several taps elsewhere do the lamps answer with their pattern,
+      // so players get to explore first (playtest 2: blinking after every tap was too direct)
+      if (hints.nudges >= POINT_AFTER_TAPS && clock.now - hints.lastPoint > POINT_COOLDOWN_MS) {
+        hints.lastPoint = clock.now;
+        cancelTimers('blink');
+        after(900, blinkLamps, 'blink');
+      }
     }
   });
 });
@@ -334,7 +338,7 @@ function blinkLamps() {
 // Repeats on its own: every 10s until the event is found, then every 20s
 function playLampPattern() {
   blinkLamps();
-  after(foundEvents.size ? 20000 : 10000, playLampPattern, 'pattern');
+  after(foundEvents.size ? 24000 : PATTERN_EVERY_MS, playLampPattern, 'pattern');
 }
 
 function resetLamps() {
@@ -452,13 +456,18 @@ function endLabBreach() {
 // "Effective idle" = time since last progress + 5s for every tap on a non-trigger prop,
 // so players who tap around get help sooner than players who just watch.
 const hintEl = document.getElementById('hint');
+// Discovery pacing (tuned from playtests; see plan.md). Raise these to give more exploring time.
 const HINTS = [
-  { after: 8000, text: 'Something in the lab keeps blinking…' },
-  { after: 22000, text: 'Those lab lights seem to blink in a certain order.' },
-  { after: 40000, text: 'Alarms usually start at the top…' },
+  { after: 15000, text: 'Something in the lab keeps blinking…' },
+  { after: 35000, text: 'Those lab lights seem to blink in a certain order.' },
+  { after: 60000, text: 'Alarms usually start at the top…' },
 ];
-const NUDGE_MS = 5000;
-const hints = { idleSince: 0, nudges: 0, storiesSeen: 0, flash: null };
+const NUDGE_MS = 1000;          // each tap on a non-trigger prop counts as this much extra idle time
+const FIRST_PATTERN_MS = 12000; // first ambient lamp-pattern blink after Enter
+const PATTERN_EVERY_MS = 14000; // repeat interval until the event is found
+const POINT_AFTER_TAPS = 4;     // non-trigger taps before a tap makes the lamps answer
+const POINT_COOLDOWN_MS = 15000;
+const hints = { idleSince: 0, nudges: 0, storiesSeen: 0, flash: null, lastPoint: -Infinity };
 
 function setHint(text) {
   if (hintEl.textContent !== text) hintEl.textContent = text;

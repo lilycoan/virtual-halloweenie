@@ -89,3 +89,22 @@ When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HH
   - the badge goes from 0/1 to 1/1, and a replay shows no card and no double count
   - no console errors
 - **Next:** re-run the peer playtest with new testers. Watch whether they connect the breach to the goal, and how long it takes them to first tap a lamp.
+
+### 2026-10-18: Peer playtest 2 (Phase 1)
+
+- **Observed (relayed by the Developer):**
+  - Testers recognized the breach as the goal, so the playtest 1 fix worked.
+  - They found it too quickly: "too much hand-holding when it told you what to do immediately after tapping [the] wrong thing."
+  - "Check alarm lights was too direct."
+  - They were confused by the tiny light rectangles floating across the bottom (the newspapers), especially since those weren't tappable.
+- **Interpretation:** the clues stacked up too fast. The door text named the solution, every off-target tap blinked the lamps, and taps sped up the hints by 5 s each. The newspapers read as UI or interactive objects, not as scenery.
+- **Revision:**
+  - The door reverts to "ACCESS DENIED".
+  - The lamps answer only after 4 off-target taps, with a 15 s cooldown.
+  - The tap speed-up drops to 1 s per tap.
+  - Text hints move to 15/35/60 s.
+  - The ambient pattern blink moves to first at 12 s, then every 14 s.
+  - The newspapers are removed. Five ambient effects remain.
+  - All pacing values are named constants at the top of the hints section in `js/main.js`.
+- **Verified (Agent, CDP):** after 3 off-target taps there's no blink and no hint; the 4th tap brings the lamp blink; the door text and no-newspapers change are confirmed.
+- **Next:** playtest again and watch the time to first lamp tap. If it's now too slow, lower `POINT_AFTER_TAPS` or the hint times.

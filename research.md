@@ -29,7 +29,7 @@ Investigate unfamiliar techniques or asset sources as needed. Verify usage terms
 - **Scene:** a vacant, zombie-themed city with a futuristic lab as the focal point. Chosen by the Developer. The other concepts considered were a witch's cottage, an abandoned carnival and a haunted lighthouse.
 - **Visual style:** modern animation. Hybrid production: an AI-generated background with SVG/CSS props and effects on top. *Trade-off:* this gives a richer backdrop than pure SVG, but the overlays have to be hand-aligned to the painting, and the painted parts can't animate.
 - **Story 1:** Lab Breach, which uses the focal point. The other options are kept for Phase 2: Manhole Rising, Antidote Mix and Emergency Broadcast.
-- **Ambient effects:** green fog, flickering lights, lab beacon pulse, and distant shamblers plus debris.
+- **Ambient effects:** green fog, flickering lights, lab beacon pulse, and distant shamblers plus debris (newspapers later removed after playtest 2, see plan.md).
 - **Props (2026-10-16):** light-only overlays on features already in the painting (warning lamps, streetlights, moon, crows, lab door). *Reason:* the flat SVG props clashed with the painted style. The car, diner sign and barricade were dropped.
 - **Stack:** plain HTML/CSS/JS with no build step, hosted on GitHub Pages.
 
