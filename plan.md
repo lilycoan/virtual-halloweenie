@@ -78,8 +78,20 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Hit window: ~1.0 s normally, ~3.6 s with reduced motion.
     - Bug fixed: the per-crossing check used a counter id; it now compares the flight object.
   - **Risk for playtest:** moon crossings come only about every 25–30 s, so a perfect solve takes 1–1.5 min, and a miss resets it. Watch for frustration. The tuning levers are `FLIGHT_MS`, the flight gap in `startFlight`, and `ECLIPSE_HALF_WIDTH`.
+- [x] **9b. Explorable lab interior + easier Eclipse** (Developer's revision after their own test: the moon trigger was "way too hard", and they wanted to go inside).
+  - Door → lab view (zoom), ⟵ Street → back. Interior props: window moon, 2 monitor walls, tank, beakers and vat. The other view is inert/hidden.
+  - Eclipse moved to the window moon: a pass every ~6.5–9.5 s, a ~2 s window, 2 hits. Antidote Mix now plays inside with no zoom (7.6 s).
+  - "Where" hints point to the lab when the next event is inside.
+  - *Agent verified (CDP), real flow with no forced timing:*
+    - Lamps → door opens → the 10 s hint "The lab door is open now…" → door tap enters the lab. Focus goes to the window moon, the street is inert and the lab is active.
+    - The window crow was caught after 5.3 s, then 8.6 s later (2/2), and Antidote Mix played inside. The card shows, the badge reads 2/2, and focus returns to the window moon.
+    - ⟵ Street returns: focus goes to the top lamp, and the lab is inert.
+    - Spam test: 3 taps/s for 60 s reached at most 1/2.
+    - Hit window: 2.0 s normally, 2.6 s with reduced motion.
+    - Tap targets line up with the painting at 390×844 and 360×640 (`?debug`).
+    - The window crow was enlarged after a screenshot showed it was too small to notice.
 - [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.
-- [ ] **11. Beacon count trigger + hints.** *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
+- [ ] **11. Monitor count trigger + hints** (moved inside, on the monitor walls). *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
 - [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**
 - [ ] **13. Final verification against the brief + `debrief.md`.**
 

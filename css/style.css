@@ -235,8 +235,8 @@ body {
   pointer-events: none;
 }
 .lamp.is-relit .lamp-pip,
-.moon.is-relit .moon-pip { animation: pip-pop 1.4s ease-out; }
-.moon-pip { left: auto; right: 100%; background: rgba(40, 120, 60, 0.9); }
+.window-moon.is-relit .moon-pip { animation: pip-pop 1.4s ease-out; }
+.moon-pip { background: rgba(40, 120, 60, 0.9); }
 @keyframes pip-pop {
   0%   { opacity: 0; transform: translateX(-20%); }
   15%, 70% { opacity: 1; transform: none; }
@@ -247,20 +247,20 @@ body {
 @keyframes tap-bump { 50% { transform: translate(-50%, -50%) scale(1.15); } }
 
 /* --- Moon --- */
-/* Eclipse trigger: the moon turns greener with each hit (--hits 0–3, set by JS) */
+/* Eclipse trigger (window moon, inside the lab): greener with each hit (--hits, set by JS) */
 .moon-tint {
   position: absolute;
   inset: 22%;
   border-radius: 50%;
   background: radial-gradient(circle, #b8ff7a, #4fd16a 70%, transparent 72%);
   mix-blend-mode: color;
-  opacity: calc(var(--hits, 0) * 0.3);
+  opacity: calc(var(--hits, 0) * 0.45);
   transition: none;
 }
-/* In-scene clue: while the crow crosses the moon (lab open), the moon flickers green */
-.moon.is-eclipsed .moon-tint { animation: eclipse-flicker 0.3s steps(2) infinite; }
-@keyframes eclipse-flicker { 50% { opacity: calc(0.25 + var(--hits, 0) * 0.3); } }
-.moon.is-missed .moon-tint { animation: moon-dim 0.8s ease-out; }
+/* In-scene clue: while the crow crosses the moon, the moon flickers green */
+.window-moon.is-eclipsed .moon-tint { animation: eclipse-flicker 0.3s steps(2) infinite; }
+@keyframes eclipse-flicker { 50% { opacity: calc(0.3 + var(--hits, 0) * 0.45); } }
+.window-moon.is-missed .moon-tint { animation: moon-dim 0.8s ease-out; }
 @keyframes moon-dim { 0% { opacity: 0.9; filter: brightness(0.4); } 100% { opacity: 0; } }
 .moon-glow {
   position: absolute;
@@ -269,7 +269,8 @@ body {
   background: radial-gradient(circle, rgba(235, 255, 215, 0.0) 35%, rgba(235, 255, 215, 0.35) 48%, transparent 70%);
   opacity: 0;
 }
-.moon.is-reacting .moon-glow { animation: moon-flare 1.6s ease-out; }
+.moon.is-reacting .moon-glow,
+.window-moon.is-reacting .moon-glow { animation: moon-flare 1.6s ease-out; }
 @keyframes moon-flare {
   0%   { opacity: 0; transform: scale(0.8); }
   25%  { opacity: 1; transform: scale(1.25); background-color: transparent; }
@@ -725,14 +726,23 @@ body {
 
 /* ============================================================
    Inside the lab (Phase 2)
-   - .lab-open (after the first Lab Breach): the door glows teal and reads ACCESS GRANTED.
-   - Stories set inside the lab: the story runner adds .lab-enter (the street zooms
-     through the door while the interior grows in), then swaps it for .lab-exit.
-     Both are CSS animations, so the shared pause rule freezes the zoom mid-way.
+   - .lab-open (after the first Lab Breach): the door glows teal and reads ACCESS GRANTED,
+     and tapping it enters the lab.
+   - Entering/leaving: JS sets data-view and plays .lab-enter (the street zooms through the
+     door while the interior grows in) or .lab-exit. Both are CSS animations, so the shared
+     pause rule freezes the zoom mid-way.
    ============================================================ */
 .world { position: absolute; inset: 0; transform-origin: 50% 66.2%; } /* origin = the lab door */
 
 .layer-interior { z-index: 4; opacity: 0; }
+/* Views: the street (default) or the lab interior. Only the current view is visible/tappable;
+   JS also makes the other view inert for keyboard and screen readers. */
+.stage[data-view="lab"] .world { opacity: 0; }
+.stage[data-view="lab"] .layer-interior { opacity: 1; }
+.stage[data-view="lab"] .layer-props,
+.stage:not([data-view="lab"]) .lab-props { visibility: hidden; }
+/* No taps while the view is zooming */
+.stage.lab-enter .prop, .stage.lab-exit .prop, .stage.lab-enter .street-btn, .stage.lab-exit .street-btn { pointer-events: none; }
 .interior-bg { width: 100%; height: 100%; object-fit: cover; }
 
 .stage.lab-enter .world { animation: world-in 1.1s ease-in forwards; }
@@ -757,6 +767,63 @@ body {
   0% { opacity: 1; transform: scale(1); }
   55%, 100% { opacity: 0; transform: scale(0.35); }
 }
+
+/* --- Interior props: light-only reactions on the painted features --- */
+.lab-props { position: absolute; inset: 0; }
+.monitors { aspect-ratio: 0.62; border-radius: 8px; }
+.tank { aspect-ratio: 0.44; border-radius: 40%; }
+.beakers { aspect-ratio: 1.3; }
+.vat { aspect-ratio: 0.6; border-radius: 30%; }
+.screen-glitch, .tank-pulse, .beaker-flash, .vat-flash { position: absolute; inset: 0; border-radius: inherit; opacity: 0; }
+.screen-glitch { background: repeating-linear-gradient(0deg, rgba(200, 255, 245, 0.5) 0 2px, rgba(20, 40, 60, 0.3) 2px 5px); mix-blend-mode: screen; }
+.monitors.is-reacting .screen-glitch { animation: glitch 0.8s steps(6); }
+@keyframes glitch {
+  0%, 100% { opacity: 0; transform: none; }
+  20% { opacity: 1; transform: translateX(-4%); }
+  40% { opacity: 0.4; transform: translateX(3%) skewX(-6deg); }
+  60% { opacity: 0.9; transform: translateY(5%); }
+}
+.tank-pulse { background: radial-gradient(closest-side, rgba(200, 255, 230, 0.8), rgba(94, 242, 201, 0)); }
+.tank.is-reacting { animation: tank-thump 0.5s ease-out; }
+.tank.is-reacting .tank-pulse { animation: glow-pulse 1.2s ease-out; }
+@keyframes tank-thump { 30% { transform: translate(-52%, -50%); } 60% { transform: translate(-48%, -50%); } }
+.beaker-flash { background: radial-gradient(closest-side, rgba(255, 140, 230, 0.75), rgba(140, 255, 120, 0)); }
+.beakers.is-reacting .beaker-flash { animation: glow-pulse 1.2s ease-out; }
+.vat-flash { background: radial-gradient(closest-side, rgba(200, 255, 110, 0.8), rgba(200, 255, 110, 0)); }
+.vat.is-reacting .vat-flash { animation: glow-pulse 1.4s ease-out; }
+@keyframes glow-pulse { 0%, 100% { opacity: 0; } 25% { opacity: 1; } }
+
+/* The window crow flies past the painted moon; clipped to the left window */
+.window-view { position: absolute; left: 9%; top: 19%; width: 17%; height: 15%; overflow: hidden; }
+.window-crow {
+  position: absolute;
+  left: -30%;
+  top: 37%;
+  width: 46%;
+  filter: drop-shadow(0 0 0.6cqw rgba(235, 255, 215, 0.5)); /* moonlit rim so it reads on the dark sky */
+  translate: -50% -50%;
+  fill: #07060b;
+  animation: flap 0.5s ease-in-out infinite alternate;
+}
+
+/* Way back out: a clear, always-visible button inside the lab */
+.street-btn {
+  position: absolute;
+  left: 50%;
+  top: 87%;
+  translate: -50% -50%;
+  pointer-events: auto;
+  min-height: 44px;
+  padding: 0 1.1em;
+  border: 1px solid rgba(94, 242, 201, 0.6);
+  border-radius: 999px;
+  background: rgba(10, 6, 20, 0.75);
+  color: var(--ink);
+  font: 700 max(16px, 4.2cqw)/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+.street-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.stage[data-state="story"] .street-btn, .stage.is-paused .street-btn { pointer-events: none; opacity: 0.4; }
 
 /* Open door: steady teal glow; a tap shows ACCESS GRANTED in green */
 .stage.lab-open .door-glow { opacity: 0.55; }
@@ -921,7 +988,10 @@ body {
 .reduced-motion .shambler,
 .reduced-motion .shambler svg,
 .reduced-motion .flyer,
-.reduced-motion .crow { animation: none; }
+.reduced-motion .crow,
+.reduced-motion .window-crow { animation: none; }
+.reduced-motion .tank.is-reacting { animation: none; }
+.reduced-motion .monitors.is-reacting .screen-glitch { animation: glow-pulse 1s ease; }
 /* Reduced motion: the crow doesn't travel; it fades in and hovers in place (JS) */
 .reduced-motion .flyer { transition: none; }
 .reduced-motion .streetlight .street-glow,

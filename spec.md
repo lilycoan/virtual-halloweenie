@@ -98,37 +98,41 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 
 ### Phase 2 contract — approved by Developer 2026-10-19 (due ~2026-10-26)
 
-**Inside the lab, one scene.** After the first Lab Breach, the door changes to **ACCESS GRANTED** and slides open, with a dim interior glow behind it. Stories 2–3 are triggered from exterior props. While they play, the view zooms through the door into a lab-interior painting for 5–10 s, then pulls back out; with reduced motion, it crossfades instead. Exploration always stays on the one street scene, per the brief's one-scene rule. *The Developer considered a cutaway tower and a full interior scene; the full interior was rejected as a likely second scene.*
+**Two views: the street and the lab interior.** *Revised 2026-10-19 by the Developer, after their own test.* After the first Lab Breach, the door changes to **ACCESS GRANTED**. Tapping it zooms through the door into the explorable lab interior (the Developer's painting); a **⟵ Street** button zooms back out. With reduced motion, the zoom becomes a crossfade.
+- Stories 2–3 are triggered and played inside the lab.
+- Interior props: the window moon (Story 2 trigger), two monitor walls (Story 3 trigger), the specimen tank, the beakers and the vat. Each has its own light reaction and sound.
+- Only the current view's props can be seen, tapped or focused (the other view is `inert`). Pause, hints, keyboard and the badge work the same in both views.
+- *Trade-off, accepted by the Developer:* the brief asks for one scene "without… switching pages". This stays one page with no reload, and the two views are one connected place, but an explorable interior may be read as a second scene. The earlier zoom-only version (exploring stayed on the street) was the lower-risk option.
 
-**Shared story rule.** All three stories run through one story runner. It handles the state change to `story`, the input lock, ambient ducking, phase classes on the scene clock, the return to `explore`, and the unlock card/count. Pause and reduced motion apply to the zoom like any other animation.
+**Shared story rule.** All three stories run through one story runner. It handles the state change to `story`, the input lock, ambient ducking, phase classes on the scene clock, the return to `explore`, and the unlock card/count. Each story plays in the view its trigger is in. Pause and reduced motion apply to the view zoom like any other animation.
 
 **Story 2: Antidote Mix (in the lab).**
-- *Sequence:* beakers bubble and change color → a vat foams over green → a cure puff makes the tank zombie goofy, and it waves → everything settles, and the view zooms back out.
-- *Trigger "Eclipse" (timing):* tap the moon while the flying crow is crossing it, 3 times. Each hit tints the moon greener (n/3 progress), and a crossing counts only once. *Revised 2026-10-19 (Developer):* a moon tap with no crow in front **resets** progress, so hammering the moon can't solve it. Once the lab is open, every other crow flight crosses the moon. The hit window is ~1 s; with reduced motion, the crow hovers in front of the moon for ~3.6 s instead of flying.
-- It becomes active once the door is open.
+- *Sequence (7.6 s):* beakers bubble and change color → a vat foams over green → a cure puff makes the tank zombie goofy, and it waves → everything settles.
+- *Trigger "Eclipse" (timing), inside the lab:* tap the window moon while the crow flies past it, **2 times**, with one hit per pass. Each hit tints the moon greener (n/2 progress). A tap with no crow in front **resets** progress, so hammering the moon can't solve it (Developer, 2026-10-19).
+  - The crow passes every ~6.5–9.5 s, with a ~2 s window to tap (2.6 s with reduced motion, where the crow hovers instead of flying).
+  - *Revised after the Developer's test:* the first version (street moon, a pass every 25–30 s, a ~1 s window, 3 hits) was "way too hard".
 
 **Story 3: Emergency Broadcast (in the lab).**
 - *Sequence:* wall monitors glitch to static → a synthesized siren and radio voice say "THIS IS NOT A DRILL" → the city map fills with spreading zombie dots → the screens cut to a smiley "JUST KIDDING" test card.
-- *Trigger (counting):* every so often, the beacon flashes a random count from 2 to 5. Tap the beacon exactly that many times before its next flash. Each tap lights a ring segment, and an extra tap resets it.
-- It becomes active once the door is open.
+- *Trigger (counting), inside the lab:* every so often, a monitor wall flashes a random count from 2 to 5. Tap that monitor wall exactly that many times before its next flash. Each tap lights a segment, and an extra tap resets it. *Moved from the street beacon to the interior monitors (Developer, 2026-10-19).*
 
-**Hints.** The same principles as Phase 1: clues live in the scene first, text hints arrive at about 15/35/60 s, and none of them states the solution. Hints target whichever story is still unfound. The exact wording will be tuned in playtests.
+**Hints.** The same principles as Phase 1: clues live in the scene first, text hints arrive at about 15/35/60 s, and none of them states the solution. Hints target whichever story is still unfound. If that story is in the other view, "where" hints come first (for example, at 10 s, "The lab door is open now…"). The exact wording will be tuned in playtests.
 
 **Progress and ending.** `EVENT_TOTAL = 3`. After all three, a short "You woke the whole lab!" ending appears, and every story can still be replayed.
 
 **Asset.** One AI-generated interior painting from the Developer (9:19.5, in the exterior's palette). Credited in `research.md` and the credits panel.
 
 **Acceptance checks (Phase 2), in addition to Phase 1's 1–9.**
-10. The door opens only after the first Lab Breach and stays open after that.
+10. The door opens only after the first Lab Breach and stays open after that. Tapping it enters the lab; ⟵ Street returns. Only the current view is interactive, by touch and keyboard.
 11. Stories 2 and 3 each trigger as specified, can't be solved by tapping everything, show progress, run 5–10 s with a beginning, middle and end, and replay.
-12. Pause freezes the zoom and in-lab effects mid-story. Reduced motion crossfades instead of zooming.
+12. Pause freezes the view zoom and in-lab effects mid-way. Reduced motion crossfades instead of zooming.
 13. The badge reaches 3/3, and the ending plays once.
 14. At least 2 more peer playtest rounds are logged in `plan.md`, plus a final phone verification and a completed `debrief.md`.
 
 ## Scope and revisions
 
 Excluded for Phase 1: stories 2–3 (candidates: Manhole Rising, Antidote Mix, Emergency Broadcast), haptics, and 3D.
-Excluded for Phase 2: an explorable interior (second scene), Manhole Rising, haptics, and 3D.
+Excluded for Phase 2: Manhole Rising, haptics, and 3D. (An explorable interior was first excluded, then chosen by the Developer on 2026-10-19; see the Phase 2 contract.)
 
 Record excluded ideas, the next behavior that must work, and consequential requirement changes with their evidence.
 

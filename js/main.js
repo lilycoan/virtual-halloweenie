@@ -28,11 +28,22 @@ if (params.has('debug')) document.body.classList.add('debug');
 
 // All state changes go through here. While the start screen is up, the scene behind it is
 // inert, so Tab reaches Enter first and hidden props can't be focused or activated.
-const sceneLayers = [...stage.querySelectorAll('.layer-props, .layer-ui')];
+// The scene has two views (data-view 'street' | 'lab'); the props of the other view are inert too.
+const streetProps = $('.layer-props');
+const labProps = $('.lab-props');
+const uiLayer = $('.layer-ui');
+function applyInert() {
+  const start = stage.dataset.state === 'start';
+  const inLab = stage.dataset.view === 'lab';
+  uiLayer.inert = start;
+  streetProps.inert = start || inLab;
+  labProps.inert = start || !inLab;
+}
 function setState(next) {
   stage.dataset.state = next;
-  sceneLayers.forEach((layer) => { layer.inert = next === 'start'; });
+  applyInert();
 }
+stage.dataset.view = 'street';
 setState('start');
 
 // ============================================================
@@ -61,7 +72,7 @@ function tick(ts) {
     const due = clock.timers.filter((t) => t.at <= clock.now);
     clock.timers = clock.timers.filter((t) => t.at > clock.now);
     due.sort((a, b) => a.at - b.at).forEach((t) => t.fn());
-    moveFlyer();
+    moveFlights();
     updateHints();
   }
   requestAnimationFrame(tick);
@@ -209,6 +220,8 @@ const sfx = {
   zoomIn: () => noise({ dur: 1.1, gain: 0.35, filter: 'bandpass', freq: 300, freqTo: 2400, q: 0.9 }),
   zoomOut: () => noise({ dur: 1.1, gain: 0.3, filter: 'bandpass', freq: 2400, freqTo: 300, q: 0.9 }),
   // Eclipse trigger: a hoot that rises with each hit; a sagging hoot when a miss resets it
+  monitorStatic: () => { noise({ dur: 0.5, gain: 0.2, filter: 'highpass', freq: 3000 }); tone({ freq: 880, type: 'square', dur: 0.08, gain: 0.05, delay: 0.45 }); },
+  tankThump: () => { tone({ freq: 60, dur: 0.35, gain: 0.45, slideTo: 40 }); noise({ dur: 0.2, gain: 0.25, filter: 'lowpass', freq: 400 }); },
   moonHit: (n) => { tone({ freq: 420 + n * 140, dur: 0.3, gain: 0.22, slideTo: 520 + n * 160 }); tone({ freq: 1047 + n * 200, type: 'triangle', dur: 0.25, gain: 0.06, delay: 0.1 }); },
   moonMiss: () => tone({ freq: 380, dur: 0.6, gain: 0.2, slideTo: 220 }),
   // Antidote Mix
@@ -265,7 +278,8 @@ function startScene() {
   hints.idleSince = clock.now;
   scheduleAmbientEvent();
   after(FIRST_PATTERN_MS, playLampPattern, 'pattern');
-  after(FIRST_FLIGHT_MS, startFlight, 'flight');
+  after(FIRST_FLIGHT_MS, () => launch(flights.street), 'flight');
+  after(FIRST_FLIGHT_MS / 2, () => launch(flights.window), 'flight');
 }
 document.getElementById('enter-btn').addEventListener('click', () => {
   initAudio();
@@ -303,12 +317,23 @@ function react(el, cls = 'is-reacting', ms = 1600) {
 }
 
 const propHandlers = {
-  moon: (el) => onMoonTap(el),
+  moon: (el) => { react(el); sfx.hoot(); },
   crows: (el) => { react(el, 'is-reacting', 2400); playSample('crow1', { gain: 0.6 }); after(250, () => playSample('crow2', { gain: 0.5 })); },
   'streetlight-left': (el) => { react(el, 'is-reacting', 1400); sfx.zap(); },
   'streetlight-right': (el) => { react(el, 'is-reacting', 1200); sfx.surge(); },
-  door: (el) => { react(el, 'is-reacting', 1600); labOpen ? sfx.granted() : sfx.denied(); },
+  door: (el) => {
+    react(el, 'is-reacting', 1600);
+    if (!labOpen) return sfx.denied();
+    sfx.granted();
+    setView('lab');
+  },
   lamp: (el) => onLampTap(el),
+  // Inside the lab
+  'window-moon': (el) => onMoonTap(el),
+  monitors: (el) => { react(el, 'is-reacting', 900); sfx.monitorStatic(); },
+  tank: (el) => { react(el, 'is-reacting', 1200); sfx.tankThump(); after(200, () => playSample('groan2', { gain: 0.3, rate: 0.7 })); },
+  beakers: (el) => { react(el, 'is-reacting', 1200); [0, 120, 260].forEach((t) => after(t, sfx.blub)); },
+  vat: (el) => { react(el, 'is-reacting', 1400); sfx.gurgle(); },
 };
 
 $$('.prop').forEach((el) => {
@@ -388,77 +413,82 @@ function resetLamps() {
 }
 
 // ============================================================
-// The flying crow: an ambient effect and the Story 2 clue. Flights run on the scene clock,
-// so pause freezes them and the Eclipse trigger can test exactly where the crow is.
-// Once the lab is open, every other flight crosses in front of the moon.
+// Crow flights, on the scene clock (so pause freezes them and the Eclipse trigger can test
+// exactly where the crow is):
+//   street : ambient crow crossing the city sky
+//   window : inside the lab, a crow passes the painted moon in the left window (Story 2 clue).
+//            Coordinates are % of the .window-view box; the moon's center is at x = WINDOW_MOON_X.
 // ============================================================
-const flyer = $('.flyer');
-const moonEl = $('.moon');
-const MOON = { x: 79.6, y: 9.1 };          // moon center, % of the stage (matches its --x/--y)
-const FLIGHT_MS = { low: 7000, moon: 9000 }; // the moon pass is slower, so it can be caught
-const ECLIPSE_HALF_WIDTH = 7;               // crow within ±7% (x) of the moon center counts (~1 s)
+const windowMoon = $('.window-moon');
+const WINDOW_MOON_X = 41;
+const ECLIPSE_HALF_WIDTH = 20;  // crow within ±20% of the window's width counts → ~2 s to tap
 const FIRST_FLIGHT_MS = 6000;
-const FLIGHT_PATHS = {
-  low:  (p) => ({ x: 110 - 125 * p, y: 24 - 8 * p }),
-  moon: (p) => { const x = 110 - 125 * p; return { x, y: MOON.y + (MOON.x - x) * 0.06 }; },
+const flights = {
+  street: {
+    el: $('.flyer'), ms: 7000, gapMs: [3000, 9000], hoverAt: 0.5,
+    path: (p) => ({ x: 110 - 125 * p, y: 24 - 8 * p }),
+  },
+  window: {
+    el: $('.window-crow'), ms: 6500, gapMs: [0, 3000], hoverAt: (115 - WINDOW_MOON_X) / 130, // a pass every ~6.5–9.5 s
+    path: (p) => ({ x: 115 - 130 * p, y: 37 + (p - 0.57) * 20 }),
+  },
 };
-let flight = null;   // { path, start }
-let flightCount = 0;
-const crow = { x: -20, y: 24, visible: false };
+Object.values(flights).forEach((f) => Object.assign(f, { start: null, pass: null, x: -30, y: 0, visible: false }));
 
-function startFlight() {
-  flightCount++;
-  const path = labOpen && flightCount % 2 === 0 ? 'moon' : 'low';
-  flight = { path, start: clock.now };
-  after(FLIGHT_MS[path] + 3000 + Math.random() * 6000, startFlight, 'flight');
+// Start a flight and schedule the next one
+function launch(f) {
+  f.start = clock.now;
+  f.pass = {}; // a fresh token per pass, so one crossing can only count once
+  after(f.ms + f.gapMs[0] + Math.random() * (f.gapMs[1] - f.gapMs[0]), () => launch(f), 'flight');
 }
 
-function moveFlyer() {
-  if (!flight) return;
-  const p = (clock.now - flight.start) / FLIGHT_MS[flight.path];
-  if (p >= 1) {
-    flight = null;
-    crow.visible = false;
-    flyer.style.left = '-20%';
-    flyer.style.opacity = '';
-    moonEl.classList.remove('is-eclipsed');
-    return;
-  }
-  if (stage.classList.contains('reduced-motion')) {
-    // No travel: the crow fades in, hovers where its path is most interesting, then fades out
-    const hoverAt = flight.path === 'moon' ? (110 - MOON.x) / 125 : 0.5;
-    Object.assign(crow, FLIGHT_PATHS[flight.path](hoverAt), { visible: p > 0.3 && p < 0.7 });
-    flyer.style.opacity = crow.visible ? '1' : '0';
-  } else {
-    Object.assign(crow, FLIGHT_PATHS[flight.path](p), { visible: true });
-  }
-  flyer.style.left = crow.x + '%';
-  flyer.style.top = crow.y + '%';
-  moonEl.classList.toggle('is-eclipsed', labOpen && crowOverMoon());
+function moveFlights() {
+  Object.values(flights).forEach((f) => {
+    if (f.start === null) return;
+    const p = (clock.now - f.start) / f.ms;
+    if (p >= 1) {
+      Object.assign(f, { start: null, pass: null, visible: false });
+      f.el.style.left = '-30%';
+      f.el.style.opacity = '';
+      return;
+    }
+    if (stage.classList.contains('reduced-motion')) {
+      // No travel: the crow fades in, hovers at its most interesting point, then fades out
+      Object.assign(f, f.path(f.hoverAt), { visible: p > 0.3 && p < 0.7 });
+      f.el.style.opacity = f.visible ? '1' : '0';
+    } else {
+      Object.assign(f, f.path(p), { visible: true });
+    }
+    f.el.style.left = f.x + '%';
+    f.el.style.top = f.y + '%';
+  });
+  windowMoon.classList.toggle('is-eclipsed', crowOverMoon());
 }
 
 function crowOverMoon() {
-  return flight?.path === 'moon' && crow.visible && Math.abs(crow.x - MOON.x) < ECLIPSE_HALF_WIDTH;
+  const f = flights.window;
+  return f.visible && Math.abs(f.x - WINDOW_MOON_X) < ECLIPSE_HALF_WIDTH;
 }
 
 // ============================================================
-// Story 2 trigger "Eclipse": once the lab is open, tap the moon while the crow is in front of it,
-// ECLIPSE_HITS times (one hit per crossing). A tap with no crow in front resets progress, so
-// hammering the moon can't solve it (Developer's choice, 2026-10-19).
+// Story 2 trigger "Eclipse" (inside the lab): tap the window moon while the crow is in front
+// of it, ECLIPSE_HITS times, one hit per pass. A tap with no crow in front resets progress, so
+// hammering the moon can't solve it (Developer's choices, 2026-10-19; eased after the
+// Developer's own test: more frequent passes, ~2 s window, 2 hits).
 // ============================================================
-const ECLIPSE_HITS = 3;
+const ECLIPSE_HITS = 2;
 let moonHits = 0;
-let lastHitFlight = null; // the flight already counted, so one crossing gives one hit
+let lastHitPass = null;
 
 function setMoonHits(n) {
   moonHits = n;
-  moonEl.style.setProperty('--hits', n);
+  windowMoon.style.setProperty('--hits', n);
 }
 
 function onMoonTap(el) {
-  if (labOpen && crowOverMoon()) {
-    if (flight === lastHitFlight) return; // already counted this crossing
-    lastHitFlight = flight;
+  if (crowOverMoon()) {
+    if (flights.window.pass === lastHitPass) return; // already counted this pass
+    lastHitPass = flights.window.pass;
     setMoonHits(moonHits + 1);
     sfx.moonHit(moonHits);
     el.querySelector('.moon-pip').textContent = `${moonHits}/${ECLIPSE_HITS}`;
@@ -551,9 +581,10 @@ function setBanner(text, cls) {
 
 // ============================================================
 // Stories. Each entry: title, duration (ms), the phase classes it adds to the stage,
-// whether it plays inside the lab, run(T) to schedule its timeline, and optional cleanup().
+// available() (can it be triggered yet), its trigger (prop, view, progress, hints),
+// run(T) to schedule its timeline, and optional cleanup(). A story plays in the view
+// its trigger is in.
 // ============================================================
-const LAB_ZOOM_MS = 1100; // matches the .lab-enter / .lab-exit animations in style.css
 
 const STORIES = {
   labBreach: {
@@ -563,6 +594,7 @@ const STORIES = {
     available: () => true,
     trigger: {
       prop: 'lamp',
+      view: 'street',
       inProgress: () => lampProgress > 0,
       progressText: 'The lab noticed you… keep going.',
       hints: [
@@ -610,35 +642,35 @@ const STORIES = {
   antidote: {
     id: 'antidote-mix',
     title: 'Antidote Mix',
-    duration: 8400,
+    duration: 7600,
     available: () => labOpen,
     trigger: {
-      prop: 'moon',
+      prop: 'window-moon',
+      view: 'lab',
       inProgress: () => moonHits > 0,
       progressText: 'The moon is turning green… keep going.',
       hints: [
         { after: 15000, text: 'The moon looks strange tonight…' },
-        { after: 35000, text: 'Something keeps crossing the moon…' },
+        { after: 35000, text: 'Something keeps passing the window…' },
         { after: 60000, text: 'Catch the crow in the moonlight.' },
       ],
     },
     cleanup: () => setMoonHits(0),
-    inLab: true,
     phases: ['mix-bubble', 'mix-foam', 'mix-mist', 'mix-cure', 'mix-settle'],
     run(T) {
-      T(1100, () => stage.classList.add('mix-bubble'));
-      for (let t = 1150; t < 3200; t += 140 + Math.random() * 120) T(t, sfx.blub);
+      T(300, () => stage.classList.add('mix-bubble'));
+      for (let t = 350; t < 2400; t += 140 + Math.random() * 120) T(t, sfx.blub);
 
-      T(3000, () => { stage.classList.add('mix-foam'); sfx.gurgle(); });
-      T(3300, () => playSample('groan1', { gain: 0.35, rate: 1.3 })); // muffled from the tank
+      T(2200, () => { stage.classList.add('mix-foam'); sfx.gurgle(); });
+      T(2500, () => playSample('groan1', { gain: 0.35, rate: 1.3 })); // muffled from the tank
 
-      T(4300, () => { stage.classList.add('mix-mist'); sfx.fizz(); });
+      T(3500, () => { stage.classList.add('mix-mist'); sfx.fizz(); });
 
-      T(5200, () => { stage.classList.add('mix-cure'); sfx.sparkle(); });
-      T(6000, sfx.hic);
-      T(7200, sfx.hic);
+      T(4400, () => { stage.classList.add('mix-cure'); sfx.sparkle(); });
+      T(5200, sfx.hic);
+      T(6400, sfx.hic);
 
-      T(6400, () => {
+      T(5600, () => {
         stage.classList.add('mix-settle');
         setBanner('✓ ANTIDOTE STABLE', 'is-clear');
         sfx.allClear();
@@ -657,31 +689,21 @@ function playStory(story) {
   setHint('');
   setAmbientLevel(0.15);
   const T = (ms, fn) => after(ms, fn, 'story');
-
-  if (story.inLab) {
-    // Zoom in through the door, play inside, zoom back out at the end
-    stage.classList.add('lab-enter');
-    sfx.zoomIn();
-    T(story.duration - LAB_ZOOM_MS, () => {
-      stage.classList.replace('lab-enter', 'lab-exit');
-      sfx.zoomOut();
-    });
-  }
   story.run(T);
   T(story.duration, () => endStory(story));
 }
 
 function endStory(story) {
-  stage.classList.remove(...story.phases, 'lab-enter', 'lab-exit');
+  stage.classList.remove(...story.phases);
   setBanner('');
   story.cleanup?.();
   activeStory = null;
-  setAmbientLevel(0.7, 1.5);
+  setAmbientLevel(viewAmbient(), 1.5);
   setState('explore');
   hints.idleSince = clock.now;
   hints.nudges = 0;
-  if (!story.dev) revealEvent(story.id, story.title);
-  $('.lamp').focus({ preventScroll: true });
+  revealEvent(story.id, story.title);
+  focusView();
 }
 
 // ============================================================
@@ -701,6 +723,37 @@ function openLab() {
 }
 
 // ============================================================
+// Views: walk into the lab through the open door, and back out with the Street button.
+// The zoom is a CSS animation (.lab-enter / .lab-exit), so pause freezes it like everything else.
+// ============================================================
+const VIEW_ZOOM_MS = 1100; // matches the .lab-enter / .lab-exit animations in style.css
+const viewAmbient = () => (stage.dataset.view === 'lab' ? 0.35 : 0.7); // wind is muffled indoors
+
+function setView(next) {
+  if (stage.dataset.view === next) return;
+  stage.dataset.view = next;
+  applyInert();
+  stage.classList.remove('lab-enter', 'lab-exit');
+  void stage.offsetWidth;
+  stage.classList.add(next === 'lab' ? 'lab-enter' : 'lab-exit');
+  next === 'lab' ? sfx.zoomIn() : sfx.zoomOut();
+  setAmbientLevel(viewAmbient(), 1);
+  cancelTimers('view');
+  after(VIEW_ZOOM_MS, () => stage.classList.remove('lab-enter', 'lab-exit'), 'view');
+  hints.idleSince = clock.now; // a new place: hint pacing starts over
+  hints.nudges = 0;
+  focusView();
+}
+
+function focusView() {
+  $(stage.dataset.view === 'lab' ? '.lab-props .prop' : '.lamp').focus({ preventScroll: true });
+}
+
+document.getElementById('street-btn').addEventListener('click', () => {
+  if (isRunning() && stage.dataset.state === 'explore') setView('street');
+});
+
+// ============================================================
 // Progressive hints: appear after idle time without story progress
 // ============================================================
 // Hints target the first story that is available but not yet found; each story carries its
@@ -714,6 +767,15 @@ const PATTERN_EVERY_MS = 14000; // repeat interval until the event is found
 const POINT_AFTER_TAPS = 4;     // non-trigger taps before a tap makes the lamps answer
 const POINT_COOLDOWN_MS = 15000;
 const hints = { idleSince: 0, nudges: 0, flash: null, lastPoint: -Infinity };
+const WHERE_HINTS = {
+  lab: [
+    { after: 10000, text: 'The lab door is open now…' },
+    { after: 30000, text: 'Whatever woke up is inside the lab.' },
+  ],
+  street: [
+    { after: 15000, text: 'Something outside is still waiting…' },
+  ],
+};
 
 function currentTarget() {
   return Object.values(STORIES).find((st) => st.available() && !foundEvents.has(st.id));
@@ -741,8 +803,10 @@ function updateHints() {
   const target = currentTarget();
   // Everything found: only a gentle replay nudge
   if (!target) return setHint(idle > 15000 ? 'The lab is quiet… for now. Every event can happen again.' : '');
+  // The next event is in the other view: hint at where to go first
+  const list = target.trigger.view === stage.dataset.view ? target.trigger.hints : WHERE_HINTS[target.trigger.view];
   let text = '';
-  target.trigger.hints.forEach((h) => { if (idle >= h.after) text = h.text; });
+  list.forEach((h) => { if (idle >= h.after) text = h.text; });
   setHint(text);
 }
 
@@ -788,11 +852,13 @@ function revealEvent(id, title) {
 // ---------- Dev shortcuts ----------
 // ?skip           : bypass the start screen (no audio; for screenshots)
 // ?story          : run Lab Breach immediately (with ?skip)
-// ?story=<key>    : run STORIES[key] immediately, e.g. ?skip&story=antidote
+// ?story=<key>    : run STORIES[key] immediately, e.g. ?skip&open&lab&story=antidote
 // ?open           : start with the lab door already open
+// ?lab            : start inside the lab (with ?skip&open)
 if (params.has('open')) openLab();
 if (params.has('skip')) {
   startScene();
+  if (params.has('lab') && labOpen) setView('lab');
   if (params.has('story')) after(300, () => playStory(STORIES[params.get('story')] || STORIES.labBreach), 'story');
 }
 window.runStory = (key = 'labBreach') => playStory(STORIES[key]); // console: runStory('antidote')
