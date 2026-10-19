@@ -50,7 +50,20 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - A moon tap during the story was ignored, and the state returned to explore.
     - With reduced motion, the transform stays `none` (opacity crossfade only).
     - Bug found and fixed: a console hook named `window.playStory` overwrote the runner and recursed. It's now `runStory()`.
-- [ ] **8. Antidote Mix sequence**, previewed with `?story=antidote`. *Verify:* screenshots of each phase, a 5–10 s duration, and a clean return.
+- [x] **8. Antidote Mix sequence**, previewed with `?skip&open&story=antidote`. It runs 8.4 s.
+  - *Sequence:*
+    - 0–1.1 s: zoom in
+    - 1.1 s: beakers bubble and shift color, the vat glows, blub sounds
+    - 3.0 s: vat foam swells and spills down the glass, gurgle
+    - 4.3 s: mist drifts to the tank, fizz
+    - 5.2 s: the tank flashes and a goofy zombie waves "hic!"
+    - 6.4 s: ✓ ANTIDOTE STABLE
+    - 7.3 s: zoom out
+  - *Agent verified (CDP):*
+    - The phase classes fire on time, and the state returns to explore.
+    - Screenshots showed weak foam, mist and flash on the first pass. Revised: a foam spill sheet, a denser mist, and a bright tank flash that covers the painted figure.
+    - Reduced motion: no transform, bubbles hidden, no rocking.
+    - The clock held at 3600 ms through a 2 s pause.
 - [ ] **9. Eclipse trigger + hints.** *Verify:* random taps don't solve it; 3 hits during the crow's crossing start the story; progress is visible.
 - [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.
 - [ ] **11. Beacon count trigger + hints.** *Verify:* a random count each round; an extra tap resets; the exact count starts the story.

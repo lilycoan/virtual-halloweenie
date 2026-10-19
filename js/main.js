@@ -207,6 +207,12 @@ const sfx = {
   // Zoom through the door into the lab (and back out)
   zoomIn: () => noise({ dur: 1.1, gain: 0.35, filter: 'bandpass', freq: 300, freqTo: 2400, q: 0.9 }),
   zoomOut: () => noise({ dur: 1.1, gain: 0.3, filter: 'bandpass', freq: 2400, freqTo: 300, q: 0.9 }),
+  // Antidote Mix
+  blub: () => tone({ freq: 180 + Math.random() * 260, dur: 0.09, gain: 0.14, slideTo: 700 + Math.random() * 400 }),
+  gurgle: () => { noise({ dur: 1.6, gain: 0.25, filter: 'lowpass', freq: 500, freqTo: 180, q: 4 }); tone({ freq: 70, type: 'triangle', dur: 1.4, gain: 0.18, slideTo: 55 }); },
+  fizz: () => noise({ dur: 1.4, gain: 0.18, filter: 'highpass', freq: 5000 }),
+  hic: () => tone({ freq: 330, type: 'triangle', dur: 0.16, gain: 0.25, slideTo: 880 }),
+  sparkle: () => [1319, 1568, 2093, 2637].forEach((f, i) => tone({ freq: f, type: 'sine', dur: 0.35, gain: 0.06, delay: i * 0.07 })),
 };
 
 // Occasional ambient sounds on the scene clock (stop while paused or during the story)
@@ -409,8 +415,29 @@ GAS.forEach((p) => {
   crowd.appendChild(node);
 });
 
-// Distant shamblers reuse the same zombie drawing
-$$('.shambler').forEach((el) => el.appendChild(zombieTemplate.content.querySelector('svg').cloneNode(true)));
+// Distant shamblers (and the tank specimen in Antidote Mix) reuse the same zombie drawing
+const zombieSvg = () => zombieTemplate.content.querySelector('svg').cloneNode(true);
+$$('.shambler').forEach((el) => el.appendChild(zombieSvg()));
+
+// Antidote Mix overlays, positioned on the interior painting (% of the stage)
+function spawn(parent, cls, vars) {
+  const el = document.createElement('div');
+  el.className = cls;
+  Object.entries(vars).forEach(([k, v]) => el.style.setProperty('--' + k, v));
+  parent.appendChild(el);
+}
+const BEAKERS = [{ x: 9.5, y: 51 }, { x: 14.2, y: 52.2 }, { x: 23.8, y: 50 }];
+BEAKERS.forEach((b, i) => [0, 1, 2, 3].forEach((n) => spawn(document.getElementById('bubbles'), 'bubble', {
+  x: b.x + (n % 2 ? 1.2 : -0.6), y: b.y, s: `${1.2 + (n % 3) * 0.5}cqw`,
+  dur: `${0.9 + n * 0.15}s`, d: `${-(i * 0.3 + n * 0.27)}s`,
+})));
+// Foam piles up on the vat rim (y ≈ 35%); a spill sheet then runs down the vat's glass
+[[81, 35.6, 5, 0.0], [84, 34.6, 6, 0.08], [87.5, 34.2, 6.5, 0.04], [90.5, 35, 5, 0.12],
+ [82.5, 36.4, 4.5, 0.2], [86, 35.8, 5.5, 0.16], [89, 36.2, 4.5, 0.24], [85, 33.6, 4, 0.3], [88.6, 33.4, 3.5, 0.34]]
+  .forEach(([x, y, w, d]) => spawn(document.getElementById('foam'), 'foam-blob', { x, y, s: `${w}cqw`, d: `${d}s` }));
+spawn(document.getElementById('foam'), 'foam-spill', {});
+[40, 43, 38, 45, 41].forEach((ty, i) => spawn(document.getElementById('mist'), 'mist-puff', { ty, d: `${i * 0.12}s` }));
+document.getElementById('tank-zombie').prepend(zombieSvg());
 
 function setBanner(text, cls) {
   banner.className = 'story-banner';
@@ -464,15 +491,33 @@ const STORIES = {
     cleanup: resetLamps,
   },
 
-  // Dev-only shell for checking the zoom (?story=zoomtest); replaced by real in-lab stories
-  zoomTest: {
-    id: 'zoom-test',
-    title: 'Zoom test',
-    duration: 5000,
-    phases: [],
+  // Story 2 (inside the lab). Beginning: beakers bubble. Middle: the vat foams over and
+  // mist drifts to the tank. End: the specimen turns goofy and waves; everything settles.
+  antidote: {
+    id: 'antidote-mix',
+    title: 'Antidote Mix',
+    duration: 8400,
     inLab: true,
-    dev: true,
-    run() {},
+    phases: ['mix-bubble', 'mix-foam', 'mix-mist', 'mix-cure', 'mix-settle'],
+    run(T) {
+      T(1100, () => stage.classList.add('mix-bubble'));
+      for (let t = 1150; t < 3200; t += 140 + Math.random() * 120) T(t, sfx.blub);
+
+      T(3000, () => { stage.classList.add('mix-foam'); sfx.gurgle(); });
+      T(3300, () => playSample('groan1', { gain: 0.35, rate: 1.3 })); // muffled from the tank
+
+      T(4300, () => { stage.classList.add('mix-mist'); sfx.fizz(); });
+
+      T(5200, () => { stage.classList.add('mix-cure'); sfx.sparkle(); });
+      T(6000, sfx.hic);
+      T(7200, sfx.hic);
+
+      T(6400, () => {
+        stage.classList.add('mix-settle');
+        setBanner('✓ ANTIDOTE STABLE', 'is-clear');
+        sfx.allClear();
+      });
+    },
   },
 };
 
@@ -619,11 +664,11 @@ function revealEvent(id, title) {
 // ---------- Dev shortcuts ----------
 // ?skip           : bypass the start screen (no audio; for screenshots)
 // ?story          : run Lab Breach immediately (with ?skip)
-// ?story=<key>    : run STORIES[key] immediately, e.g. ?skip&story=zoomTest
+// ?story=<key>    : run STORIES[key] immediately, e.g. ?skip&story=antidote
 // ?open           : start with the lab door already open
 if (params.has('open')) openLab();
 if (params.has('skip')) {
   setState('explore');
   if (params.has('story')) after(300, () => playStory(STORIES[params.get('story')] || STORIES.labBreach), 'story');
 }
-window.runStory = (key = 'labBreach') => playStory(STORIES[key]); // console: runStory('zoomTest')
+window.runStory = (key = 'labBreach') => playStory(STORIES[key]); // console: runStory('antidote')
