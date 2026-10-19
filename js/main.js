@@ -1,5 +1,8 @@
 // Virtual Hallo"weenie": Lab Breach
 //
+// Stories: every story is a STORIES entry played by one runner (playStory), which owns the
+// state change, input lock, ambient ducking, the zoom into the lab, cleanup and the unlock.
+//
 // Coordination model (one rule for everything that moves, sounds or waits):
 //   - App state  : stage.dataset.state = 'start' | 'explore' | 'story'
 //   - Pause flag : stage.classList 'is-paused' (independent of state, so a story can be paused mid-way)
@@ -198,6 +201,12 @@ const sfx = {
   whoosh: () => noise({ dur: 1.0, gain: 0.5, filter: 'bandpass', freq: 400, freqTo: 4000, q: 0.8 }),
   doorSlam: () => { noise({ dur: 0.3, gain: 0.5, filter: 'lowpass', freq: 300 }); tone({ freq: 70, type: 'sine', dur: 0.4, gain: 0.4, slideTo: 40 }); },
   allClear: () => [659, 784, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: 0.5, gain: 0.16, delay: i * 0.12 })),
+  granted: () => { tone({ freq: 523, type: 'square', dur: 0.14, gain: 0.08 }); tone({ freq: 784, type: 'square', dur: 0.24, gain: 0.08, delay: 0.15 }); },
+  // Pneumatic door: a hiss plus a rising hum
+  doorOpen: () => { noise({ dur: 1.2, gain: 0.3, filter: 'bandpass', freq: 1800, freqTo: 600, q: 0.6 }); tone({ freq: 110, type: 'triangle', dur: 1.4, gain: 0.2, slideTo: 220 }); },
+  // Zoom through the door into the lab (and back out)
+  zoomIn: () => noise({ dur: 1.1, gain: 0.35, filter: 'bandpass', freq: 300, freqTo: 2400, q: 0.9 }),
+  zoomOut: () => noise({ dur: 1.1, gain: 0.3, filter: 'bandpass', freq: 2400, freqTo: 300, q: 0.9 }),
 };
 
 // Occasional ambient sounds on the scene clock (stop while paused or during the story)
@@ -283,7 +292,7 @@ const propHandlers = {
   crows: (el) => { react(el, 'is-reacting', 2400); playSample('crow1', { gain: 0.6 }); after(250, () => playSample('crow2', { gain: 0.5 })); },
   'streetlight-left': (el) => { react(el, 'is-reacting', 1400); sfx.zap(); },
   'streetlight-right': (el) => { react(el, 'is-reacting', 1200); sfx.surge(); },
-  door: (el) => { react(el, 'is-reacting', 1600); sfx.denied(); },
+  door: (el) => { react(el, 'is-reacting', 1600); labOpen ? sfx.granted() : sfx.denied(); },
   lamp: (el) => onLampTap(el),
 };
 
@@ -329,7 +338,7 @@ function onLampTap(el) {
     react(el, 'is-relit', 1400); // restarts the pip even when a lit lamp is tapped again
     hints.idleSince = clock.now; // progress counts as activity
     hints.nudges = 0;
-    if (lampProgress === LAMP_ORDER.length) after(450, startLabBreach, 'story');
+    if (lampProgress === LAMP_ORDER.length) after(450, () => playStory(STORIES.labBreach), 'story');
   } else {
     // Wrong lamp: buzz, blink all lamps amber, reset progress
     sfx.wrong();
@@ -403,8 +412,6 @@ GAS.forEach((p) => {
 // Distant shamblers reuse the same zombie drawing
 $$('.shambler').forEach((el) => el.appendChild(zombieTemplate.content.querySelector('svg').cloneNode(true)));
 
-const STORY_PHASES = ['breach-alarm', 'breach-gas', 'breach-zombies', 'breach-decon', 'breach-clear'];
-
 function setBanner(text, cls) {
   banner.className = 'story-banner';
   void banner.offsetWidth;
@@ -412,58 +419,115 @@ function setBanner(text, cls) {
   if (cls) banner.classList.add(cls);
 }
 
-function startLabBreach() {
+// ============================================================
+// Stories. Each entry: title, duration (ms), the phase classes it adds to the stage,
+// whether it plays inside the lab, run(T) to schedule its timeline, and optional cleanup().
+// ============================================================
+const LAB_ZOOM_MS = 1100; // matches the .lab-enter / .lab-exit animations in style.css
+
+const STORIES = {
+  labBreach: {
+    id: 'lab-breach',
+    title: 'Lab Breach',
+    duration: 8600,
+    phases: ['breach-alarm', 'breach-gas', 'breach-zombies', 'breach-decon', 'breach-clear'],
+    run(T) {
+      // Beginning (0–2s): alarm
+      T(0, () => {
+        stage.classList.add('breach-alarm');
+        setBanner('⚠ CONTAINMENT BREACH', 'is-alarm');
+        sfx.alarmWhoop();
+      });
+      T(900, sfx.alarmWhoop);
+      T(1800, sfx.alarmWhoop);
+
+      // Middle (1.8–6s): vents burst, zombies lurch out
+      T(1800, () => { stage.classList.add('breach-gas'); sfx.gasHiss(); });
+      T(2400, () => { stage.classList.add('breach-zombies'); playSample('crowd', { gain: 0.9 }); });
+      T(3400, () => playSample('moan', { gain: 0.6 }));
+      T(4600, () => playSample('groan2', { gain: 0.6, rate: 0.9 }));
+
+      // End (6–8.6s): decontamination flash pulls everything back inside
+      T(6000, () => {
+        stage.classList.remove('breach-alarm');
+        stage.classList.add('breach-decon');
+        setBanner('');
+        sfx.whoosh();
+      });
+      T(6900, () => { sfx.doorSlam(); resetLamps(); });
+      T(7300, () => {
+        stage.classList.add('breach-clear');
+        setBanner('✓ ALL CLEAR', 'is-clear');
+        sfx.allClear();
+      });
+    },
+    cleanup: resetLamps,
+  },
+
+  // Dev-only shell for checking the zoom (?story=zoomtest); replaced by real in-lab stories
+  zoomTest: {
+    id: 'zoom-test',
+    title: 'Zoom test',
+    duration: 5000,
+    phases: [],
+    inLab: true,
+    dev: true,
+    run() {},
+  },
+};
+
+let activeStory = null;
+
+// The one story runner. Input is locked by state 'story' (prop clicks check it),
+// and everything is scheduled on the scene clock under the 'story' tag, so pause freezes it.
+function playStory(story) {
+  activeStory = story;
   setState('story');
   setHint('');
   setAmbientLevel(0.15);
   const T = (ms, fn) => after(ms, fn, 'story');
 
-  // Beginning (0–2s): alarm
-  T(0, () => {
-    stage.classList.add('breach-alarm');
-    setBanner('⚠ CONTAINMENT BREACH', 'is-alarm');
-    sfx.alarmWhoop();
-  });
-  T(900, sfx.alarmWhoop);
-  T(1800, sfx.alarmWhoop);
-
-  // Middle (1.8–6s): vents burst, zombies lurch out
-  T(1800, () => { stage.classList.add('breach-gas'); sfx.gasHiss(); });
-  T(2400, () => { stage.classList.add('breach-zombies'); playSample('crowd', { gain: 0.9 }); });
-  T(3400, () => playSample('moan', { gain: 0.6 }));
-  T(4600, () => playSample('groan2', { gain: 0.6, rate: 0.9 }));
-
-  // End (6–8.6s): decontamination flash pulls everything back inside
-  T(6000, () => {
-    stage.classList.remove('breach-alarm');
-    stage.classList.add('breach-decon');
-    setBanner('');
-    sfx.whoosh();
-  });
-  T(6900, () => {
-    sfx.doorSlam();
-    resetLamps();
-  });
-  T(7300, () => {
-    stage.classList.add('breach-clear');
-    setBanner('✓ ALL CLEAR', 'is-clear');
-    sfx.allClear();
-  });
-  T(8600, endLabBreach);
+  if (story.inLab) {
+    // Zoom in through the door, play inside, zoom back out at the end
+    stage.classList.add('lab-enter');
+    sfx.zoomIn();
+    T(story.duration - LAB_ZOOM_MS, () => {
+      stage.classList.replace('lab-enter', 'lab-exit');
+      sfx.zoomOut();
+    });
+  }
+  story.run(T);
+  T(story.duration, () => endStory(story));
 }
 
-function endLabBreach() {
-  stage.classList.remove(...STORY_PHASES);
+function endStory(story) {
+  stage.classList.remove(...story.phases, 'lab-enter', 'lab-exit');
   setBanner('');
-  resetLamps();
+  story.cleanup?.();
+  activeStory = null;
   setAmbientLevel(0.7, 1.5);
   setState('explore');
-  hints.level = 0;
   hints.idleSince = clock.now;
   hints.nudges = 0;
   hints.storiesSeen++;
-  revealEvent('lab-breach', 'Lab Breach');
+  if (!story.dev) revealEvent(story.id, story.title);
   $('.lamp').focus({ preventScroll: true });
+}
+
+// ============================================================
+// The lab opens after the first Lab Breach, so stories 2–3 can play inside it
+// ============================================================
+let labOpen = false;
+const labDoor = $('.lab-door');
+
+function openLab() {
+  if (labOpen) return;
+  labOpen = true;
+  stage.classList.add('lab-open');
+  labDoor.querySelector('.door-text').textContent = 'ACCESS GRANTED';
+  labDoor.setAttribute('aria-label', 'Lab entrance (open)');
+  react(labDoor, 'is-opening', 2400);
+  sfx.doorOpen();
 }
 
 // ============================================================
@@ -545,6 +609,7 @@ function revealEvent(id, title) {
     unlockCard.hidden = true;
     document.getElementById('events-count').textContent = foundEvents.size;
     react(eventsEl, 'is-new', 1200);
+    if (id === 'lab-breach') openLab();
     flashHint(foundEvents.size < EVENT_TOTAL
       ? 'Something else in the city is stirring…'
       : 'You woke the lab! Tap the lights again to replay.', 4500);
@@ -552,10 +617,13 @@ function revealEvent(id, title) {
 }
 
 // ---------- Dev shortcuts ----------
-// ?skip  : bypass the start screen (no audio; for screenshots)
-// ?story : run the story immediately after Enter/skip
+// ?skip           : bypass the start screen (no audio; for screenshots)
+// ?story          : run Lab Breach immediately (with ?skip)
+// ?story=<key>    : run STORIES[key] immediately, e.g. ?skip&story=zoomTest
+// ?open           : start with the lab door already open
+if (params.has('open')) openLab();
 if (params.has('skip')) {
   setState('explore');
-  if (params.has('story')) after(300, startLabBreach, 'story');
+  if (params.has('story')) after(300, () => playStory(STORIES[params.get('story')] || STORIES.labBreach), 'story');
 }
-window.labBreach = startLabBreach; // console: labBreach()
+window.runStory = (key = 'labBreach') => playStory(STORIES[key]); // console: runStory('zoomTest')

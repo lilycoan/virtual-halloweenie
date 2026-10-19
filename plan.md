@@ -42,7 +42,14 @@ Main risk: mobile audio unlock and overlay alignment on real phones, so we deplo
 
 Main risk: the zoom into the interior lining up with the painted door on every phone, while pause and reduced motion still work. The second risk is that the new triggers end up too obvious or too hidden, so we playtest each one as soon as it works.
 
-- [ ] **7. Shared story runner + door unlock + zoom shell.** Refactor Lab Breach into a story runner shared by all three stories (state, input lock, ducking, reveal). The door opens after the first breach. The zoom goes in and out to a placeholder interior until the Developer's painting arrives. *Verify:* Lab Breach behaves exactly as before; pause freezes the zoom mid-way; reduced motion crossfades.
+- [x] **7. Shared story runner + door unlock + zoom shell.** Refactor Lab Breach into a story runner shared by all three stories (state, input lock, ducking, reveal). The door opens after the first breach. The zoom goes in and out to a placeholder interior until the Developer's painting arrives. *Verify:* Lab Breach behaves exactly as before; pause freezes the zoom mid-way; reduced motion crossfades.
+  - *Agent verified (CDP), 2026-10-19:*
+    - The Lab Breach tap trigger plays the story again; the card, the 1/1 count and focus are unchanged.
+    - The door then opens: `lab-open`, ACCESS GRANTED, and a two-tone "granted" beep on tap.
+    - The `zoomTest` story zooms into the Developer's interior painting and back. While paused, the world transform held at scale 2.875 over 2 s and the clock was frozen.
+    - A moon tap during the story was ignored, and the state returned to explore.
+    - With reduced motion, the transform stays `none` (opacity crossfade only).
+    - Bug found and fixed: a console hook named `window.playStory` overwrote the runner and recursed. It's now `runStory()`.
 - [ ] **8. Antidote Mix sequence**, previewed with `?story=antidote`. *Verify:* screenshots of each phase, a 5–10 s duration, and a clean return.
 - [ ] **9. Eclipse trigger + hints.** *Verify:* random taps don't solve it; 3 hits during the crow's crossing start the story; progress is visible.
 - [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.

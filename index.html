@@ -13,6 +13,10 @@
        so overlays stay aligned with the background painting on any phone size. -->
   <main id="stage" class="stage" data-state="start">
 
+    <!-- The street "world" (layers 1–5). One wrapper, so the story runner can zoom the whole
+         street through the lab door (transform-origin = the door) for stories set inside the lab. -->
+    <div class="world">
+
     <!-- 1. Background painting -->
     <img class="layer layer-bg" src="assets/img/bg-city.jpg" alt="" aria-hidden="true">
 
@@ -67,7 +71,14 @@
       <svg class="flyer" viewBox="0 0 60 24"><path d="M0 12 q14 -12 30 0 q16 -12 30 0 q-16 -4 -30 6 q-14 -10 -30 -6 z"/></svg>
     </div>
 
-    <!-- 6. Story FX (Lab Breach). Hidden until the story runs. -->
+    </div><!-- /.world -->
+
+    <!-- 5b. Lab interior: shown only while a story plays inside the lab (zoomed in through the door) -->
+    <div class="layer layer-interior" aria-hidden="true">
+      <img class="interior-bg" src="assets/img/lab-interior.jpg" alt="">
+    </div>
+
+    <!-- 6. Story FX. Hidden until a story runs. -->
     <div class="layer layer-fx" aria-hidden="true">
       <div class="alarm-vignette"></div>
       <div class="gas-cloud" id="gas-cloud"></div>
@@ -108,7 +119,7 @@
     <section id="credits" class="credits" hidden aria-labelledby="credits-title">
       <h2 id="credits-title">Credits</h2>
       <p><strong>Developer:</strong> Lily Coan</p>
-      <p><strong>Background painting:</strong> AI-generated for this project by the Developer.</p>
+      <p><strong>Background paintings (city street and lab interior):</strong> AI-generated for this project by the Developer.</p>
       <p><strong>Code, overlays &amp; synthesized sound effects:</strong> written for this project with Claude (Anthropic).</p>
       <p><strong>Sounds (CC0, via Freesound.org):</strong></p>
       <ul>
