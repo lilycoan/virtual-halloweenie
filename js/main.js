@@ -61,6 +61,7 @@ function tick(ts) {
     const due = clock.timers.filter((t) => t.at <= clock.now);
     clock.timers = clock.timers.filter((t) => t.at > clock.now);
     due.sort((a, b) => a.at - b.at).forEach((t) => t.fn());
+    moveFlyer();
     updateHints();
   }
   requestAnimationFrame(tick);
@@ -207,6 +208,9 @@ const sfx = {
   // Zoom through the door into the lab (and back out)
   zoomIn: () => noise({ dur: 1.1, gain: 0.35, filter: 'bandpass', freq: 300, freqTo: 2400, q: 0.9 }),
   zoomOut: () => noise({ dur: 1.1, gain: 0.3, filter: 'bandpass', freq: 2400, freqTo: 300, q: 0.9 }),
+  // Eclipse trigger: a hoot that rises with each hit; a sagging hoot when a miss resets it
+  moonHit: (n) => { tone({ freq: 420 + n * 140, dur: 0.3, gain: 0.22, slideTo: 520 + n * 160 }); tone({ freq: 1047 + n * 200, type: 'triangle', dur: 0.25, gain: 0.06, delay: 0.1 }); },
+  moonMiss: () => tone({ freq: 380, dur: 0.6, gain: 0.2, slideTo: 220 }),
   // Antidote Mix
   blub: () => tone({ freq: 180 + Math.random() * 260, dur: 0.09, gain: 0.14, slideTo: 700 + Math.random() * 400 }),
   gurgle: () => { noise({ dur: 1.6, gain: 0.25, filter: 'lowpass', freq: 500, freqTo: 180, q: 4 }); tone({ freq: 70, type: 'triangle', dur: 1.4, gain: 0.18, slideTo: 55 }); },
@@ -255,12 +259,17 @@ document.addEventListener('visibilitychange', () => {
 const startScreen = document.getElementById('start-screen');
 const credits = document.getElementById('credits');
 
-document.getElementById('enter-btn').addEventListener('click', () => {
-  initAudio();
+// Starts everything that runs on its own in the scene (also used by the ?skip dev flag)
+function startScene() {
   setState('explore');
   hints.idleSince = clock.now;
   scheduleAmbientEvent();
   after(FIRST_PATTERN_MS, playLampPattern, 'pattern');
+  after(FIRST_FLIGHT_MS, startFlight, 'flight');
+}
+document.getElementById('enter-btn').addEventListener('click', () => {
+  initAudio();
+  startScene();
   $('.lamp').focus({ preventScroll: true });
 });
 document.getElementById('credits-btn').addEventListener('click', () => {
@@ -294,7 +303,7 @@ function react(el, cls = 'is-reacting', ms = 1600) {
 }
 
 const propHandlers = {
-  moon: (el) => { react(el); sfx.hoot(); },
+  moon: (el) => onMoonTap(el),
   crows: (el) => { react(el, 'is-reacting', 2400); playSample('crow1', { gain: 0.6 }); after(250, () => playSample('crow2', { gain: 0.5 })); },
   'streetlight-left': (el) => { react(el, 'is-reacting', 1400); sfx.zap(); },
   'streetlight-right': (el) => { react(el, 'is-reacting', 1200); sfx.surge(); },
@@ -308,12 +317,13 @@ $$('.prop').forEach((el) => {
     if (!isRunning() || stage.dataset.state !== 'explore') return;
     // Exploring the wrong things brings the next hint sooner
     propHandlers[el.dataset.prop]?.(el);
-    if (el.dataset.prop !== 'lamp') {
+    const target = currentTarget();
+    if (target && el.dataset.prop !== target.trigger.prop) {
       // Exploring other things brings the next hint a little sooner…
       hints.nudges++;
       // …and only after several taps elsewhere do the lamps answer with their pattern,
       // so players get to explore first (playtest 2: blinking after every tap was too direct)
-      if (hints.nudges >= POINT_AFTER_TAPS && clock.now - hints.lastPoint > POINT_COOLDOWN_MS) {
+      if (target === STORIES.labBreach && hints.nudges >= POINT_AFTER_TAPS && clock.now - hints.lastPoint > POINT_COOLDOWN_MS) {
         hints.lastPoint = clock.now;
         cancelTimers('blink');
         after(900, blinkLamps, 'blink');
@@ -375,6 +385,99 @@ function playLampPattern() {
 function resetLamps() {
   lampProgress = 0;
   lamps.forEach((l) => l.classList.remove('is-lit'));
+}
+
+// ============================================================
+// The flying crow: an ambient effect and the Story 2 clue. Flights run on the scene clock,
+// so pause freezes them and the Eclipse trigger can test exactly where the crow is.
+// Once the lab is open, every other flight crosses in front of the moon.
+// ============================================================
+const flyer = $('.flyer');
+const moonEl = $('.moon');
+const MOON = { x: 79.6, y: 9.1 };          // moon center, % of the stage (matches its --x/--y)
+const FLIGHT_MS = { low: 7000, moon: 9000 }; // the moon pass is slower, so it can be caught
+const ECLIPSE_HALF_WIDTH = 7;               // crow within ±7% (x) of the moon center counts (~1 s)
+const FIRST_FLIGHT_MS = 6000;
+const FLIGHT_PATHS = {
+  low:  (p) => ({ x: 110 - 125 * p, y: 24 - 8 * p }),
+  moon: (p) => { const x = 110 - 125 * p; return { x, y: MOON.y + (MOON.x - x) * 0.06 }; },
+};
+let flight = null;   // { path, start }
+let flightCount = 0;
+const crow = { x: -20, y: 24, visible: false };
+
+function startFlight() {
+  flightCount++;
+  const path = labOpen && flightCount % 2 === 0 ? 'moon' : 'low';
+  flight = { path, start: clock.now };
+  after(FLIGHT_MS[path] + 3000 + Math.random() * 6000, startFlight, 'flight');
+}
+
+function moveFlyer() {
+  if (!flight) return;
+  const p = (clock.now - flight.start) / FLIGHT_MS[flight.path];
+  if (p >= 1) {
+    flight = null;
+    crow.visible = false;
+    flyer.style.left = '-20%';
+    flyer.style.opacity = '';
+    moonEl.classList.remove('is-eclipsed');
+    return;
+  }
+  if (stage.classList.contains('reduced-motion')) {
+    // No travel: the crow fades in, hovers where its path is most interesting, then fades out
+    const hoverAt = flight.path === 'moon' ? (110 - MOON.x) / 125 : 0.5;
+    Object.assign(crow, FLIGHT_PATHS[flight.path](hoverAt), { visible: p > 0.3 && p < 0.7 });
+    flyer.style.opacity = crow.visible ? '1' : '0';
+  } else {
+    Object.assign(crow, FLIGHT_PATHS[flight.path](p), { visible: true });
+  }
+  flyer.style.left = crow.x + '%';
+  flyer.style.top = crow.y + '%';
+  moonEl.classList.toggle('is-eclipsed', labOpen && crowOverMoon());
+}
+
+function crowOverMoon() {
+  return flight?.path === 'moon' && crow.visible && Math.abs(crow.x - MOON.x) < ECLIPSE_HALF_WIDTH;
+}
+
+// ============================================================
+// Story 2 trigger "Eclipse": once the lab is open, tap the moon while the crow is in front of it,
+// ECLIPSE_HITS times (one hit per crossing). A tap with no crow in front resets progress, so
+// hammering the moon can't solve it (Developer's choice, 2026-10-19).
+// ============================================================
+const ECLIPSE_HITS = 3;
+let moonHits = 0;
+let lastHitFlight = null; // the flight already counted, so one crossing gives one hit
+
+function setMoonHits(n) {
+  moonHits = n;
+  moonEl.style.setProperty('--hits', n);
+}
+
+function onMoonTap(el) {
+  if (labOpen && crowOverMoon()) {
+    if (flight === lastHitFlight) return; // already counted this crossing
+    lastHitFlight = flight;
+    setMoonHits(moonHits + 1);
+    sfx.moonHit(moonHits);
+    el.querySelector('.moon-pip').textContent = `${moonHits}/${ECLIPSE_HITS}`;
+    react(el, 'is-relit', 1400);
+    react(el, 'is-reacting');
+    hints.idleSince = clock.now;
+    hints.nudges = 0;
+    if (moonHits === ECLIPSE_HITS) after(450, () => playStory(STORIES.antidote), 'story');
+    return;
+  }
+  react(el);
+  if (moonHits > 0) {
+    setMoonHits(0);
+    react(el, 'is-missed', 800);
+    sfx.moonMiss();
+    flashHint('The moon slipped back into shadow…', 3000);
+  } else {
+    sfx.hoot();
+  }
 }
 
 // ============================================================
@@ -457,6 +560,17 @@ const STORIES = {
     id: 'lab-breach',
     title: 'Lab Breach',
     duration: 8600,
+    available: () => true,
+    trigger: {
+      prop: 'lamp',
+      inProgress: () => lampProgress > 0,
+      progressText: 'The lab noticed you… keep going.',
+      hints: [
+        { after: 15000, text: 'Something in the lab keeps blinking…' },
+        { after: 35000, text: 'Those lab lights blink in a certain order. Were you watching?' },
+        { after: 60000, text: 'Count the blinks… one light speaks twice.' },
+      ],
+    },
     phases: ['breach-alarm', 'breach-gas', 'breach-zombies', 'breach-decon', 'breach-clear'],
     run(T) {
       // Beginning (0–2s): alarm
@@ -497,6 +611,18 @@ const STORIES = {
     id: 'antidote-mix',
     title: 'Antidote Mix',
     duration: 8400,
+    available: () => labOpen,
+    trigger: {
+      prop: 'moon',
+      inProgress: () => moonHits > 0,
+      progressText: 'The moon is turning green… keep going.',
+      hints: [
+        { after: 15000, text: 'The moon looks strange tonight…' },
+        { after: 35000, text: 'Something keeps crossing the moon…' },
+        { after: 60000, text: 'Catch the crow in the moonlight.' },
+      ],
+    },
+    cleanup: () => setMoonHits(0),
     inLab: true,
     phases: ['mix-bubble', 'mix-foam', 'mix-mist', 'mix-cure', 'mix-settle'],
     run(T) {
@@ -554,7 +680,6 @@ function endStory(story) {
   setState('explore');
   hints.idleSince = clock.now;
   hints.nudges = 0;
-  hints.storiesSeen++;
   if (!story.dev) revealEvent(story.id, story.title);
   $('.lamp').focus({ preventScroll: true });
 }
@@ -578,21 +703,21 @@ function openLab() {
 // ============================================================
 // Progressive hints: appear after idle time without story progress
 // ============================================================
-// "Effective idle" = time since last progress + 5s for every tap on a non-trigger prop,
-// so players who tap around get help sooner than players who just watch.
+// Hints target the first story that is available but not yet found; each story carries its
+// own trigger hints. "Effective idle" = time since last progress + NUDGE_MS for every tap on a
+// prop that isn't the target's trigger, so players who tap around get help a little sooner.
 const hintEl = document.getElementById('hint');
 // Discovery pacing (tuned from playtests; see plan.md). Raise these to give more exploring time.
-const HINTS = [
-  { after: 15000, text: 'Something in the lab keeps blinking…' },
-  { after: 35000, text: 'Those lab lights blink in a certain order. Were you watching?' },
-  { after: 60000, text: 'Count the blinks… one light speaks twice.' },
-];
 const NUDGE_MS = 1000;          // each tap on a non-trigger prop counts as this much extra idle time
 const FIRST_PATTERN_MS = 12000; // first ambient lamp-pattern blink after Enter
 const PATTERN_EVERY_MS = 14000; // repeat interval until the event is found
 const POINT_AFTER_TAPS = 4;     // non-trigger taps before a tap makes the lamps answer
 const POINT_COOLDOWN_MS = 15000;
-const hints = { idleSince: 0, nudges: 0, storiesSeen: 0, flash: null, lastPoint: -Infinity };
+const hints = { idleSince: 0, nudges: 0, flash: null, lastPoint: -Infinity };
+
+function currentTarget() {
+  return Object.values(STORIES).find((st) => st.available() && !foundEvents.has(st.id));
+}
 
 function setHint(text) {
   if (hintEl.textContent !== text) hintEl.textContent = text;
@@ -608,25 +733,24 @@ function updateHints() {
   if (hints.flash && clock.now < hints.flash.until) return setHint(hints.flash.text);
   hints.flash = null;
 
-  // Mid-trigger: encourage without telling
-  if (lampProgress > 0) return setHint('The lab noticed you… keep going.');
+  // Mid-trigger (any story, including replays): encourage without telling
+  const started = Object.values(STORIES).find((st) => st.trigger.inProgress());
+  if (started) return setHint(started.trigger.progressText);
 
   const idle = clock.now - hints.idleSince + hints.nudges * NUDGE_MS;
-  // After the story has played once, only a gentle replay nudge appears
-  if (hints.storiesSeen > 0) {
-    return setHint(idle > 15000 ? 'The lab is resetting… it might breach again.' : '');
-  }
+  const target = currentTarget();
+  // Everything found: only a gentle replay nudge
+  if (!target) return setHint(idle > 15000 ? 'The lab is quiet… for now. Every event can happen again.' : '');
   let text = '';
-  HINTS.forEach((h) => { if (idle >= h.after) text = h.text; });
+  target.trigger.hints.forEach((h) => { if (idle >= h.after) text = h.text; });
   setHint(text);
 }
 
 // ============================================================
 // Lab events counter: one event per story.
 // EVENT_TOTAL drives the badge, the start-screen goal, the unlock card and the found message.
-// Phase 1 ships one story; set this to 3 when the other stories exist.
 // ============================================================
-const EVENT_TOTAL = 1;
+const EVENT_TOTAL = Object.keys(STORIES).length;
 const foundEvents = new Set();
 const eventsEl = document.getElementById('events');
 const unlockCard = document.getElementById('unlock-card');
@@ -638,7 +762,7 @@ document.getElementById('goal').innerHTML = EVENT_TOTAL === 1
 
 function revealEvent(id, title) {
   if (foundEvents.has(id)) {
-    flashHint('The lab is resetting… it might breach again.', 3000);
+    flashHint('The lab is settling… it might stir again.', 3000);
     return; // replays don't count twice
   }
   foundEvents.add(id);
@@ -655,9 +779,9 @@ function revealEvent(id, title) {
     document.getElementById('events-count').textContent = foundEvents.size;
     react(eventsEl, 'is-new', 1200);
     if (id === 'lab-breach') openLab();
-    flashHint(foundEvents.size < EVENT_TOTAL
-      ? 'Something else in the city is stirring…'
-      : 'You woke the lab! Tap the lights again to replay.', 4500);
+    flashHint(foundEvents.size === EVENT_TOTAL ? 'You woke the whole lab! Every event can happen again.'
+      : id === 'lab-breach' ? 'The lab door opened… something else is stirring.'
+      : 'Something else is stirring…', 4500);
   }, 'unlock');
 }
 
@@ -668,7 +792,7 @@ function revealEvent(id, title) {
 // ?open           : start with the lab door already open
 if (params.has('open')) openLab();
 if (params.has('skip')) {
-  setState('explore');
+  startScene();
   if (params.has('story')) after(300, () => playStory(STORIES[params.get('story')] || STORIES.labBreach), 'story');
 }
 window.runStory = (key = 'labBreach') => playStory(STORIES[key]); // console: runStory('antidote')

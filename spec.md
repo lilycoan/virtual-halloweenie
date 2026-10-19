@@ -104,7 +104,7 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 
 **Story 2: Antidote Mix (in the lab).**
 - *Sequence:* beakers bubble and change color → a vat foams over green → a cure puff makes the tank zombie goofy, and it waves → everything settles, and the view zooms back out.
-- *Trigger "Eclipse" (timing):* tap the moon while the flying crow is crossing it, 3 times. Each hit tints the moon greener (n/3 progress). A miss gets the normal moon reaction and doesn't count.
+- *Trigger "Eclipse" (timing):* tap the moon while the flying crow is crossing it, 3 times. Each hit tints the moon greener (n/3 progress), and a crossing counts only once. *Revised 2026-10-19 (Developer):* a moon tap with no crow in front **resets** progress, so hammering the moon can't solve it. Once the lab is open, every other crow flight crosses the moon. The hit window is ~1 s; with reduced motion, the crow hovers in front of the moon for ~3.6 s instead of flying.
 - It becomes active once the door is open.
 
 **Story 3: Emergency Broadcast (in the lab).**

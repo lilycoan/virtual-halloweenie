@@ -64,7 +64,20 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Screenshots showed weak foam, mist and flash on the first pass. Revised: a foam spill sheet, a denser mist, and a bright tank flash that covers the painted figure.
     - Reduced motion: no transform, bubbles hidden, no rocking.
     - The clock held at 3600 ms through a 2 s pause.
-- [ ] **9. Eclipse trigger + hints.** *Verify:* random taps don't solve it; 3 hits during the crow's crossing start the story; progress is visible.
+- [x] **9. Eclipse trigger + hints.**
+  - The crow's flights now run on the scene clock instead of CSS, so pause freezes them and hits are tested against the crow's exact position.
+  - Hints now target the first story that is available and unfound; each story carries its own trigger hints.
+  - `EVENT_TOTAL` is now derived from `STORIES`.
+  - *Agent verified (CDP):*
+    - An early tap does nothing.
+    - A hit gives 1/3, and a double tap in the same crossing still gives 1.
+    - A miss resets to 0 with "The moon slipped back into shadow…".
+    - 3 hits tint the moon (opacity 0.9) and start Antidote Mix, and the card appears.
+    - Spam test: 3 taps/s for 60 s through 2 real moon crossings reached at most 1/3.
+    - Moon hints appear at 15/35/60 s, and `is-eclipsed` (green flicker) shows during the crossing.
+    - Hit window: ~1.0 s normally, ~3.6 s with reduced motion.
+    - Bug fixed: the per-crossing check used a counter id; it now compares the flight object.
+  - **Risk for playtest:** moon crossings come only about every 25–30 s, so a perfect solve takes 1–1.5 min, and a miss resets it. Watch for frustration. The tuning levers are `FLIGHT_MS`, the flight gap in `startFlight`, and `ECLIPSE_HALF_WIDTH`.
 - [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.
 - [ ] **11. Beacon count trigger + hints.** *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
 - [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**

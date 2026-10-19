@@ -43,7 +43,7 @@
       <button class="prop lamp" data-prop="lamp" data-index="2" data-pip="3/3" style="--x:50; --y:48; --w:13" aria-label="Bottom warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
 
       <!-- Moon -->
-      <button class="prop moon" data-prop="moon" style="--x:79.6; --y:9.1; --w:14" aria-label="Moon"><span class="moon-glow"></span></button>
+      <button class="prop moon" data-prop="moon" style="--x:79.6; --y:9.1; --w:14" aria-label="Moon"><span class="moon-glow"></span><span class="moon-tint"></span><span class="moon-pip" aria-hidden="true"></span></button>
 
       <!-- Crows perched on the left ruin's ledge -->
       <button class="prop crows" data-prop="crows" style="--x:14; --y:16.4; --w:17" aria-label="Crows on the ruined building">
@@ -65,7 +65,7 @@
       <button class="prop lab-door" data-prop="door" style="--x:50; --y:66.2; --w:13" aria-label="Lab entrance"><span class="door-glow"></span><span class="door-text">ACCESS DENIED</span></button>
     </div>
 
-    <!-- 5. Front fog + a crow flying across the sky -->
+    <!-- 5. Front fog + a crow flying across the sky (its flights are scheduled by JS; some pass the moon) -->
     <div class="layer layer-fog-front" aria-hidden="true"><div class="fog-strip"></div></div>
     <div class="layer layer-debris" aria-hidden="true">
       <svg class="flyer" viewBox="0 0 60 24"><path d="M0 12 q14 -12 30 0 q16 -12 30 0 q-16 -4 -30 6 q-14 -10 -30 -6 z"/></svg>
