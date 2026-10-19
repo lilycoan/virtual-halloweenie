@@ -96,9 +96,39 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 8. The live HTTPS URL works on a physical phone.
 9. A credits screen lists the Developer and every asset.
 
+### Phase 2 contract — approved by Developer 2026-10-19 (due ~2026-10-26)
+
+**Inside the lab, one scene.** After the first Lab Breach, the door changes to **ACCESS GRANTED** and slides open, with a dim interior glow behind it. Stories 2–3 are triggered from exterior props. While they play, the view zooms through the door into a lab-interior painting for 5–10 s, then pulls back out; with reduced motion, it crossfades instead. Exploration always stays on the one street scene, per the brief's one-scene rule. *The Developer considered a cutaway tower and a full interior scene; the full interior was rejected as a likely second scene.*
+
+**Shared story rule.** All three stories run through one story runner. It handles the state change to `story`, the input lock, ambient ducking, phase classes on the scene clock, the return to `explore`, and the unlock card/count. Pause and reduced motion apply to the zoom like any other animation.
+
+**Story 2: Antidote Mix (in the lab).**
+- *Sequence:* beakers bubble and change color → a vat foams over green → a cure puff makes the tank zombie goofy, and it waves → everything settles, and the view zooms back out.
+- *Trigger "Eclipse" (timing):* tap the moon while the flying crow is crossing it, 3 times. Each hit tints the moon greener (n/3 progress). A miss gets the normal moon reaction and doesn't count.
+- It becomes active once the door is open.
+
+**Story 3: Emergency Broadcast (in the lab).**
+- *Sequence:* wall monitors glitch to static → a synthesized siren and radio voice say "THIS IS NOT A DRILL" → the city map fills with spreading zombie dots → the screens cut to a smiley "JUST KIDDING" test card.
+- *Trigger (counting):* every so often, the beacon flashes a random count from 2 to 5. Tap the beacon exactly that many times before its next flash. Each tap lights a ring segment, and an extra tap resets it.
+- It becomes active once the door is open.
+
+**Hints.** The same principles as Phase 1: clues live in the scene first, text hints arrive at about 15/35/60 s, and none of them states the solution. Hints target whichever story is still unfound. The exact wording will be tuned in playtests.
+
+**Progress and ending.** `EVENT_TOTAL = 3`. After all three, a short "You woke the whole lab!" ending appears, and every story can still be replayed.
+
+**Asset.** One AI-generated interior painting from the Developer (9:19.5, in the exterior's palette). Credited in `research.md` and the credits panel.
+
+**Acceptance checks (Phase 2), in addition to Phase 1's 1–9.**
+10. The door opens only after the first Lab Breach and stays open after that.
+11. Stories 2 and 3 each trigger as specified, can't be solved by tapping everything, show progress, run 5–10 s with a beginning, middle and end, and replay.
+12. Pause freezes the zoom and in-lab effects mid-story. Reduced motion crossfades instead of zooming.
+13. The badge reaches 3/3, and the ending plays once.
+14. At least 2 more peer playtest rounds are logged in `plan.md`, plus a final phone verification and a completed `debrief.md`.
+
 ## Scope and revisions
 
 Excluded for Phase 1: stories 2–3 (candidates: Manhole Rising, Antidote Mix, Emergency Broadcast), haptics, and 3D.
+Excluded for Phase 2: an explorable interior (second scene), Manhole Rising, haptics, and 3D.
 
 Record excluded ideas, the next behavior that must work, and consequential requirement changes with their evidence.
 

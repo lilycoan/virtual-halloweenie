@@ -38,6 +38,18 @@ Main risk: mobile audio unlock and overlay alignment on real phones, so we deplo
     - Fix: one `setState()` now makes the scene layers `inert` on the start screen.
     - Re-test: Tab → Enter first, then the props in order → Pause. Space/Enter activate lamps, P pauses and blocks input, and the story returns focus to the scene. The focus ring is visible.
 
+### Phase 2 (due ~Mon 2026-10-26)
+
+Main risk: the zoom into the interior lining up with the painted door on every phone, while pause and reduced motion still work. The second risk is that the new triggers end up too obvious or too hidden, so we playtest each one as soon as it works.
+
+- [ ] **7. Shared story runner + door unlock + zoom shell.** Refactor Lab Breach into a story runner shared by all three stories (state, input lock, ducking, reveal). The door opens after the first breach. The zoom goes in and out to a placeholder interior until the Developer's painting arrives. *Verify:* Lab Breach behaves exactly as before; pause freezes the zoom mid-way; reduced motion crossfades.
+- [ ] **8. Antidote Mix sequence**, previewed with `?story=antidote`. *Verify:* screenshots of each phase, a 5–10 s duration, and a clean return.
+- [ ] **9. Eclipse trigger + hints.** *Verify:* random taps don't solve it; 3 hits during the crow's crossing start the story; progress is visible.
+- [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.
+- [ ] **11. Beacon count trigger + hints.** *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
+- [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**
+- [ ] **13. Final verification against the brief + `debrief.md`.**
+
 Dev flags: `?debug` outlines tap targets; `?skip` bypasses the start screen.
 Local preview: `python3 -m http.server 8765`, then open http://localhost:8765
 
