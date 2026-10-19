@@ -90,6 +90,10 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Hit window: 2.0 s normally, 2.6 s with reduced motion.
     - Tap targets line up with the painting at 390×844 and 360×640 (`?debug`).
     - The window crow was enlarged after a screenshot showed it was too small to notice.
+- [x] **9c. Eclipse = one catch** (Developer: "still not intuitive"). `ECLIPSE_HITS = 1`. *Agent verified (CDP):* an early tap does nothing; one tap during a real pass (3.75 s in) started Antidote Mix, and the card showed.
+  - **Open risks:**
+    - Tapping the moon nonstop will now solve it within one pass.
+    - The brief's "show progress toward completion" now rests only on the green flicker.
 - [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.
 - [ ] **11. Monitor count trigger + hints** (moved inside, on the monitor walls). *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
 - [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**

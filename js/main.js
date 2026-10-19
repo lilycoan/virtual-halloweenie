@@ -474,9 +474,9 @@ function crowOverMoon() {
 // Story 2 trigger "Eclipse" (inside the lab): tap the window moon while the crow is in front
 // of it, ECLIPSE_HITS times, one hit per pass. A tap with no crow in front resets progress, so
 // hammering the moon can't solve it (Developer's choices, 2026-10-19; eased after the
-// Developer's own test: more frequent passes, ~2 s window, 2 hits).
+// Developer's own tests: more frequent passes, ~2 s window, then a single catch).
 // ============================================================
-const ECLIPSE_HITS = 2;
+const ECLIPSE_HITS = 1;
 let moonHits = 0;
 let lastHitPass = null;
 
