@@ -143,3 +143,8 @@ When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HH
   - triggers can't be solved by sweeping
   - clues live in the scene, and text hints come later
   - nothing that looks interactive is decoration only
+
+### 2026-10-19: Phase 1 final verification
+
+- **Developer:** opened the latest deployed build (`2b77334`) on a physical iPhone and confirmed it works. Also confirmed the credits name, "Lily Coan".
+- Phase 1 deliverables are complete: the working prototype at https://lilycoan.github.io/virtual-halloweenie/, the current `research.md`/`spec.md`/`plan.md`, the git log, and transcripts in `transcripts/`.
