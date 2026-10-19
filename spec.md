@@ -108,7 +108,7 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 
 **Story 2: Antidote Mix (in the lab).**
 - *Sequence (7.6 s):* beakers bubble and change color → a vat foams over green → a cure puff makes the tank zombie goofy, and it waves → everything settles.
-- *Trigger "Eclipse" (timing), inside the lab:* tap the window moon **once** while the crow flies past it. *Revised again by the Developer (2026-10-19, "still not intuitive"): previously 2 hits, with a miss resetting progress.* A tap with no crow in front just gets the normal hoot. The only feedback before the solve is the moon flickering green while the crow covers it.
+- *Trigger "Eclipse" (timing), inside the lab:* tap the window moon **once** while the crow flies past it. *Revised again by the Developer (2026-10-19, "still not intuitive"): previously 2 hits, with a miss resetting progress.* A tap with no crow in front just gets the normal hoot. *Then, after "no reason to tap the moon":* the window moon pulses 3 times when you enter the lab (while the event is unfound) and glows brighter as the crow approaches, which shows progress toward the catch. It flickers green while the crow covers it, and the first moon hint now comes at 8 s.
   - The crow passes every ~6.5–9.5 s, with a ~2 s window to tap (2.6 s with reduced motion, where the crow hovers instead of flying).
   - *Revised after the Developer's test:* the first version (street moon, a pass every 25–30 s, a ~1 s window, 3 hits) was "way too hard".
 

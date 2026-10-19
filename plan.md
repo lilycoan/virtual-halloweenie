@@ -94,6 +94,9 @@ Main risk: the zoom into the interior lining up with the painted door on every p
   - **Open risks:**
     - Tapping the moon nonstop will now solve it within one pass.
     - The brief's "show progress toward completion" now rests only on the green flicker.
+- [x] **9d. Reason to tap the moon** (Developer: "no reason to tap moon").
+  - Changes: an entry pulse (×3), an approach glow (`--near`), and the first moon hint moved to 8 s.
+  - *Agent verified (CDP):* `is-beckoning` is on 1.9 s after entering, with the glow at 0.93, and it's cleared by 5.9 s. `--near` read 0.14 as the crow approached and 0.67 over the moon. The hint is empty at 7 s and shows at 8.5 s.
 - [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.
 - [ ] **11. Monitor count trigger + hints** (moved inside, on the monitor walls). *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
 - [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**

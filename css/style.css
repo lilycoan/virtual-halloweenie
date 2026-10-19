@@ -260,6 +260,11 @@ body {
 /* In-scene clue: while the crow crosses the moon, the moon flickers green */
 .window-moon.is-eclipsed .moon-tint { animation: eclipse-flicker 0.3s steps(2) infinite; }
 @keyframes eclipse-flicker { 50% { opacity: calc(0.3 + var(--hits, 0) * 0.45); } }
+/* Why tap the moon? It pulls attention when you walk in (.is-beckoning), and glows brighter
+   as the crow approaches it (--near 0–1, set by JS), which also shows progress toward the catch */
+.window-moon .moon-glow { opacity: var(--near, 0); }
+.window-moon.is-beckoning .moon-glow { animation: beckon 1.3s ease-in-out 3; }
+@keyframes beckon { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 .window-moon.is-missed .moon-tint { animation: moon-dim 0.8s ease-out; }
 @keyframes moon-dim { 0% { opacity: 0.9; filter: brightness(0.4); } 100% { opacity: 0; } }
 .moon-glow {

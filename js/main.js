@@ -463,6 +463,10 @@ function moveFlights() {
     f.el.style.top = f.y + '%';
   });
   windowMoon.classList.toggle('is-eclipsed', crowOverMoon());
+  // The moon glows brighter as the crow approaches: 0 when far, 1 when it covers the moon
+  const w = flights.window;
+  const near = w.visible ? Math.max(0, 1 - Math.abs(w.x - WINDOW_MOON_X) / 60) : 0;
+  windowMoon.style.setProperty('--near', near.toFixed(2));
 }
 
 function crowOverMoon() {
@@ -650,7 +654,7 @@ const STORIES = {
       inProgress: () => moonHits > 0,
       progressText: 'The moon is turning green… keep going.',
       hints: [
-        { after: 15000, text: 'The moon looks strange tonight…' },
+        { after: 8000, text: 'The moon looks strange tonight…' },
         { after: 35000, text: 'Something keeps passing the window…' },
         { after: 60000, text: 'Catch the crow in the moonlight.' },
       ],
@@ -742,6 +746,8 @@ function setView(next) {
   after(VIEW_ZOOM_MS, () => stage.classList.remove('lab-enter', 'lab-exit'), 'view');
   hints.idleSince = clock.now; // a new place: hint pacing starts over
   hints.nudges = 0;
+  // While the moon event is unfound, the window moon pulses as you walk in
+  if (next === 'lab' && !foundEvents.has(STORIES.antidote.id)) after(VIEW_ZOOM_MS, () => react(windowMoon, 'is-beckoning', 4000), 'view');
   focusView();
 }
 
