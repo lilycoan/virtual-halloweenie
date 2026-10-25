@@ -94,6 +94,22 @@
         <div class="tank-glow" style="--x:50; --y:42; --w:20"></div>
         <div class="tank-zombie" id="tank-zombie"><span class="hic">hic!</span></div>
       </div>
+      <!-- Story 3: Emergency Broadcast. One screen overlay per painted monitor wall (visuals only:
+           the screens are too small for readable text, so the words go in the story banner). -->
+      <div class="broadcast" aria-hidden="true">
+        <div class="screen" data-side="left" style="--x:32.5; --y:41.5; --w:17">
+          <div class="bc-static"></div>
+          <div class="bc-alert"><span class="bc-icon">⚠</span></div>
+          <div class="bc-map" id="bc-map"></div>
+          <div class="bc-card"><span class="bc-smile">☺</span></div>
+        </div>
+        <div class="screen" data-side="right" style="--x:69.5; --y:41.5; --w:17">
+          <div class="bc-static"></div>
+          <div class="bc-alert"><span class="bc-icon">⚠</span></div>
+          <div class="bc-count"><strong id="bc-count">0</strong></div>
+          <div class="bc-card"><span class="bc-smile">☺</span></div>
+        </div>
+      </div>
       <!-- Interior props -->
       <div class="lab-props">
         <button class="prop window-moon" data-prop="window-moon" style="--x:16; --y:24.6; --w:12" aria-label="Moon through the lab window"><span class="moon-glow"></span><span class="moon-tint"></span><span class="moon-pip" aria-hidden="true"></span></button>

@@ -76,7 +76,7 @@ body {
 
 /* Shared positioning for anything placed with --x/--y/--w */
 .prop, .beacon, .shambler,
-.beaker-glow, .vat-glow, .tank-glow {
+.beaker-glow, .vat-glow, .tank-glow, .screen {
   position: absolute;
   left: calc(var(--x) * 1%);
   top: calc(var(--y) * 1%);
@@ -987,6 +987,70 @@ body {
 .stage.mix-settle .foam { animation: fade-out-hold 1s ease-in forwards; }
 
 /* ============================================================
+   Story 3: Emergency Broadcast (inside the lab, on both monitor walls)
+   Phase classes: bc-static → bc-alert → bc-map → bc-twist → bc-settle
+   ============================================================ */
+.screen { aspect-ratio: 0.62; border-radius: 6px; overflow: hidden; container-type: inline-size; }
+.screen > * {
+  position: absolute; inset: 0;
+  display: grid; place-content: center; justify-items: center; gap: 4cqw;
+  text-align: center; opacity: 0;
+  font: 800 13cqw/1.05 ui-monospace, "SF Mono", Menlo, monospace;
+}
+.bc-static {
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.35) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.5) 0 2px, rgba(200,220,230,0.4) 2px 3px, transparent 3px 7px),
+    #3a4450;
+  background-size: 100% 100%, 9px 100%;
+}
+.stage.bc-static .bc-static { opacity: 1; animation: static-roll 0.18s steps(3) infinite; }
+@keyframes static-roll { to { background-position: 0 7px, 11px 0; } }
+
+.bc-alert { background: #6e0710; color: #fff; }
+.bc-icon { font-size: 60cqw; line-height: 1; color: #ffd33b; }
+.stage.bc-alert .bc-alert { opacity: 1; animation: alert-blink 0.6s steps(1) infinite; }
+@keyframes alert-blink { 50% { background: #a80f1c; } }
+
+.bc-map {
+  background:
+    linear-gradient(rgba(94,242,201,0.25) 1px, transparent 1px) 0 0 / 100% 12%,
+    linear-gradient(90deg, rgba(94,242,201,0.25) 1px, transparent 1px) 0 0 / 16% 100%,
+    #071a1c;
+}
+.bc-dot {
+  position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%);
+  width: 7cqw; aspect-ratio: 1; border-radius: 50%;
+  background: #8dff6a; box-shadow: 0 0 3cqw #8dff6a;
+  translate: -50% -50%; scale: 0;
+}
+.bc-count { background: #071a1c; color: #8dff6a; }
+.bc-count strong { font-size: 30cqw; writing-mode: vertical-rl; text-orientation: upright; letter-spacing: -0.1em; }
+.stage.bc-map .bc-alert { opacity: 0; animation: none; }
+.stage.bc-map .bc-map, .stage.bc-map .bc-count { opacity: 1; }
+.stage.bc-map .bc-dot { animation: dot-pop 0.4s ease-out var(--d) forwards; }
+@keyframes dot-pop { 60% { scale: 1.4; } to { scale: 1; } }
+
+/* The twist: glitch, then a cheerful test card */
+.bc-card {
+  color: #1a1430;
+  background: linear-gradient(90deg, #f6f6f6 0 14%, #ffe14d 14% 28%, #5ef2c9 28% 42%, #6dff7a 42% 57%, #ff6ad5 57% 71%, #ff5b5b 71% 85%, #5b7bff 85%);
+  text-shadow: 0 0 2px #fff, 0 0 6px #fff;
+}
+.bc-smile { font-size: 70cqw; line-height: 1; }
+/* (filter only: the screens are positioned with transform, so the glitch mustn't move them) */
+.stage.bc-twist .screen { animation: screen-jolt 0.6s steps(5); }
+@keyframes screen-jolt {
+  20% { filter: hue-rotate(120deg) brightness(1.7); }
+  40% { filter: invert(1); }
+  60% { filter: contrast(3) saturate(0); }
+  100% { filter: none; }
+}
+.stage.bc-twist .bc-map, .stage.bc-twist .bc-count { opacity: 0; }
+.stage.bc-twist .bc-card { animation: glow-up 0.4s steps(2) 0.3s forwards; }
+.stage.bc-settle .screen { animation: fade-out-hold 1s ease forwards; }
+
+/* ============================================================
    Reduced motion: no flashes/strobes/travel; slow fades instead
    ============================================================ */
 .reduced-motion .fog-strip { animation-duration: 160s; }
@@ -1034,3 +1098,9 @@ body {
 .reduced-motion.mix-cure .tank-glow { animation: glow-up 1.2s ease forwards; }
 .reduced-motion.mix-cure .tank-zombie svg { animation: none; }
 .reduced-motion.mix-cure .hic { animation: fade-in-hold 0.8s ease 0.8s forwards; }
+/* Emergency Broadcast: no rolling static, blinking or popping */
+.reduced-motion.bc-static .bc-static,
+.reduced-motion.bc-alert .bc-alert,
+.reduced-motion.bc-twist .screen { animation: none; }
+.reduced-motion.bc-map .bc-dot { animation: fade-in-hold 0.6s ease var(--d) forwards; scale: 1; opacity: 0; }
+.reduced-motion.bc-twist .bc-card { animation: fade-in-hold 0.6s ease forwards; }

@@ -97,7 +97,13 @@ Main risk: the zoom into the interior lining up with the painted door on every p
 - [x] **9d. Reason to tap the moon** (Developer: "no reason to tap moon").
   - Changes: an entry pulse (×3), an approach glow (`--near`), and the first moon hint moved to 8 s.
   - *Agent verified (CDP):* `is-beckoning` is on 1.9 s after entering, with the glow at 0.93, and it's cleared by 5.9 s. `--near` read 0.14 as the crow approached and 0.67 over the moon. The hint is empty at 7 s and shows at 8.5 s.
-- [ ] **10. Emergency Broadcast sequence**, previewed with `?story=broadcast`.
+- [x] **10. Emergency Broadcast sequence**, previewed with `?skip&open&lab&story=broadcast`. It runs 8 s; the badge now reads n/3 (`EVENT_TOTAL` is derived from `STORIES`).
+  - *Agent verified (CDP):*
+    - The phases fire on time: static at 0.6 s; the typed alert at 1–2.2 s; the map and count at 3.9 s; JUST A TEST at 5.4 s. The state returns to explore at 9.75 s, and the card appears.
+    - At 360 px, the longest banner is 270 of 295 px wide.
+    - Pause at 3.6 s: the counter held at 516 and the clock held for 2 s, with the dot animations paused.
+    - Reduced motion: no static roll, alert blink or glitch animation.
+    - Fixed while building: the glitch used `transform`, which would have moved the positioned screens. It's now filter-only.
 - [ ] **11. Monitor count trigger + hints** (moved inside, on the monitor walls). *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
 - [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**
 - [ ] **13. Final verification against the brief + `debrief.md`.**

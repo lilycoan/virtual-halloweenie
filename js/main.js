@@ -224,6 +224,17 @@ const sfx = {
   tankThump: () => { tone({ freq: 60, dur: 0.35, gain: 0.45, slideTo: 40 }); noise({ dur: 0.2, gain: 0.25, filter: 'lowpass', freq: 400 }); },
   moonHit: (n) => { tone({ freq: 420 + n * 140, dur: 0.3, gain: 0.22, slideTo: 520 + n * 160 }); tone({ freq: 1047 + n * 200, type: 'triangle', dur: 0.25, gain: 0.06, delay: 0.1 }); },
   moonMiss: () => tone({ freq: 380, dur: 0.6, gain: 0.2, slideTo: 220 }),
+  // Emergency Broadcast
+  staticBurst: (dur = 1.0) => noise({ dur, gain: 0.25, filter: 'highpass', freq: 1800 }),
+  chirp: () => [0, 0.07, 0.14].forEach((d) => tone({ freq: 1400, type: 'square', dur: 0.04, gain: 0.06, delay: d })),
+  key: () => tone({ freq: 1900 + Math.random() * 300, type: 'square', dur: 0.015, gain: 0.03 }),
+  wail: () => { tone({ freq: 480, type: 'sawtooth', dur: 0.45, gain: 0.1, slideTo: 900 }); tone({ freq: 900, type: 'sawtooth', dur: 0.45, gain: 0.1, slideTo: 480, delay: 0.45 }); },
+  dotBlip: () => tone({ freq: 700 + Math.random() * 500, type: 'sine', dur: 0.06, gain: 0.05 }),
+  // A silly "just kidding" jingle with a boing at the end
+  jingle: () => {
+    [523, 659, 784, 659, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: 0.18, gain: 0.14, delay: i * 0.13 }));
+    tone({ freq: 180, type: 'sine', dur: 0.5, gain: 0.25, slideTo: 620, delay: 0.75 });
+  },
   // Antidote Mix
   blub: () => tone({ freq: 180 + Math.random() * 260, dur: 0.09, gain: 0.14, slideTo: 700 + Math.random() * 400 }),
   gurgle: () => { noise({ dur: 1.6, gain: 0.25, filter: 'lowpass', freq: 500, freqTo: 180, q: 4 }); tone({ freq: 70, type: 'triangle', dur: 1.4, gain: 0.18, slideTo: 55 }); },
@@ -576,6 +587,15 @@ spawn(document.getElementById('foam'), 'foam-spill', {});
 [40, 43, 38, 45, 41].forEach((ty, i) => spawn(document.getElementById('mist'), 'mist-puff', { ty, d: `${i * 0.12}s` }));
 document.getElementById('tank-zombie').prepend(zombieSvg());
 
+// Emergency Broadcast map: zombie dots spread out from one corner of the city map
+const bcMap = document.getElementById('bc-map');
+for (let i = 0; i < 16; i++) {
+  const r = 12 + i * 5;            // spreading radius (%)
+  const a = i * 2.4;               // golden-ish angle so dots don't line up
+  spawn(bcMap, 'bc-dot', { x: 30 + Math.cos(a) * r * 0.8, y: 65 + Math.sin(a) * r, d: `${i * 0.13}s` });
+}
+const bcCount = document.getElementById('bc-count');
+
 function setBanner(text, cls) {
   banner.className = 'story-banner';
   void banner.offsetWidth;
@@ -680,6 +700,54 @@ const STORIES = {
         sfx.allClear();
       });
     },
+  },
+
+  // Story 3 (inside the lab). Beginning: the monitors fill with static, then an alert.
+  // Middle: a map of the city fills with zombie dots while the count climbs. End: it was a test.
+  broadcast: {
+    id: 'emergency-broadcast',
+    title: 'Emergency Broadcast',
+    duration: 8000,
+    available: () => labOpen,
+    trigger: {
+      prop: 'monitors',
+      view: 'lab',
+      inProgress: () => false, // replaced by the monitor count trigger (checkpoint 11)
+      progressText: '',
+      hints: [],
+    },
+    phases: ['bc-static', 'bc-alert', 'bc-map', 'bc-twist', 'bc-settle'],
+    run(T) {
+      T(0, () => { stage.classList.add('bc-static'); sfx.staticBurst(1.0); sfx.chirp(); });
+
+      // The alert is typed into the banner, one key at a time
+      const ALERT = '📡 THIS IS NOT A DRILL';
+      T(1000, () => {
+        stage.classList.replace('bc-static', 'bc-alert');
+        setBanner('', 'is-alarm');
+        sfx.wail();
+      });
+      [...ALERT].forEach((_, i) => T(1050 + i * 55, () => { banner.textContent = [...ALERT].slice(0, i + 1).join(''); sfx.key(); }));
+      T(1900, sfx.wail);
+      T(2800, sfx.wail);
+
+      T(3000, () => { stage.classList.add('bc-map'); playSample('crowd', { gain: 0.5 }); });
+      for (let i = 0; i < 16; i++) T(3000 + i * 130, sfx.dotBlip);
+      // The count climbs fast, then holds
+      for (let t = 0; t <= 2200; t += 100) {
+        const n = Math.round(9999 * (t / 2200) ** 2);
+        T(3000 + t, () => { bcCount.textContent = n; banner.textContent = `ZOMBIES SPOTTED: ${n.toLocaleString('en-US')}`; });
+      }
+
+      T(5300, () => {
+        stage.classList.add('bc-twist');
+        sfx.staticBurst(0.4);
+        setBanner('☺ JUST A TEST!', 'is-clear');
+        sfx.jingle();
+      });
+      T(6900, () => stage.classList.add('bc-settle'));
+    },
+    cleanup: () => { bcCount.textContent = '0'; },
   },
 };
 

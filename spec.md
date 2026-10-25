@@ -113,7 +113,8 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
   - *Revised after the Developer's test:* the first version (street moon, a pass every 25–30 s, a ~1 s window, 3 hits) was "way too hard".
 
 **Story 3: Emergency Broadcast (in the lab).**
-- *Sequence:* wall monitors glitch to static → a synthesized siren and radio voice say "THIS IS NOT A DRILL" → the city map fills with spreading zombie dots → the screens cut to a smiley "JUST KIDDING" test card.
+- *Sequence (8 s):* the wall monitors fill with static → red ⚠ alerts and a synthesized siren while "📡 THIS IS NOT A DRILL" types into the banner → the left screen's city map fills with zombie dots while the right screen and the banner count "ZOMBIES SPOTTED" up to 9,999 → a glitch cuts to rainbow ☺ test cards and "☺ JUST A TEST!" with a silly jingle.
+  - *Changed while building:* the spoken radio voice became typed banner text plus radio chirps. Browser speech can't be paused with the AudioContext, and the brief requires Play/Pause to stop all sound. Words go in the banner because each monitor wall is only ~66 px wide on a phone.
 - *Trigger (counting), inside the lab:* every so often, a monitor wall flashes a random count from 2 to 5. Tap that monitor wall exactly that many times before its next flash. Each tap lights a segment, and an extra tap resets it. *Moved from the street beacon to the interior monitors (Developer, 2026-10-19).*
 
 **Hints.** The same principles as Phase 1: clues live in the scene first, text hints arrive at about 15/35/60 s, and none of them states the solution. Hints target whichever story is still unfound. If that story is in the other view, "where" hints come first (for example, at 10 s, "The lab door is open now…"). The exact wording will be tuned in playtests.
