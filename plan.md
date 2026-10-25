@@ -127,6 +127,8 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Street: 3 lamps → moon → crows → streetlights → door → Pause.
     - Lab: window moon → 2 monitor walls → tank → beakers → vat → Street → Pause.
     - Enter on the door and on Street switches views and moves focus.
+  - **Developer decisions (2026-10-25):** keep the park line in the ending; retitle the app "Wake the Lab"; delete the unused `bg-placeholder.svg` and `lab-interior-placeholder.svg`.
+  - **Remaining:** playtest 6 with fresh testers on this build.
   - **Credits:** no new external assets in Phase 2. The interior painting is credited, and the new sounds are synthesized.
 - [ ] **13. Final verification against the brief + `debrief.md`.**
 

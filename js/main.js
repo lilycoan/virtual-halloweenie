@@ -1,4 +1,4 @@
-// Virtual Hallo"weenie": Lab Breach
+// Virtual Hallo"weenie": Wake the Lab
 //
 // States: start → explore ⇄ story, and once, after the last event is found: ending → explore.
 // Stories: every story is a STORIES entry played by one runner (playStory), which owns the

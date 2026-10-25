@@ -119,7 +119,10 @@ Reference the brief's fixed requirements rather than copying them. Specify your 
 
 **Hints.** The same principles as Phase 1: clues live in the scene first, text hints arrive at about 15/35/60 s, and none of them states the solution. Hints target whichever story is still unfound. If that story is in the other view, "where" hints come first (for example, at 10 s, "The lab door is open now…"). The exact wording will be tuned in playtests.
 
-**Progress and ending.** `EVENT_TOTAL = 3`. After all three, a short "You woke the whole lab!" ending appears, and every story can still be replayed.
+**Progress and ending.** `EVENT_TOTAL = 3` (derived from `STORIES`).
+- After the third unlock card, a one-time ending card appears with a fanfare: "✦ 3/3 lab events ✦ / You woke the whole lab!" Its text closes with the client line (approved by the Developer 2026-10-25): "The lab never really sleeps. Come see what else wakes up at the park this Halloween."
+- Scene input waits until **Keep exploring**. Pause stays usable on top of the card. Every story can still be replayed.
+- **Title:** the app is now "Wake the Lab" (Developer, 2026-10-25), since "Lab Breach" is only story 1.
 
 **Asset.** One AI-generated interior painting from the Developer (9:19.5, in the exterior's palette). Credited in `research.md` and the credits panel.
 
