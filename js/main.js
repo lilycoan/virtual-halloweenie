@@ -220,6 +220,8 @@ const sfx = {
   zoomIn: () => noise({ dur: 1.1, gain: 0.35, filter: 'bandpass', freq: 300, freqTo: 2400, q: 0.9 }),
   zoomOut: () => noise({ dur: 1.1, gain: 0.3, filter: 'bandpass', freq: 2400, freqTo: 300, q: 0.9 }),
   // Eclipse trigger: a hoot that rises with each hit; a sagging hoot when a miss resets it
+  blipBeep: () => tone({ freq: 988, type: 'square', dur: 0.12, gain: 0.08 }),
+  answerBeep: (n) => tone({ freq: 660 + n * 90, type: 'sine', dur: 0.1, gain: 0.14 }),
   monitorStatic: () => { noise({ dur: 0.5, gain: 0.2, filter: 'highpass', freq: 3000 }); tone({ freq: 880, type: 'square', dur: 0.08, gain: 0.05, delay: 0.45 }); },
   tankThump: () => { tone({ freq: 60, dur: 0.35, gain: 0.45, slideTo: 40 }); noise({ dur: 0.2, gain: 0.25, filter: 'lowpass', freq: 400 }); },
   moonHit: (n) => { tone({ freq: 420 + n * 140, dur: 0.3, gain: 0.22, slideTo: 520 + n * 160 }); tone({ freq: 1047 + n * 200, type: 'triangle', dur: 0.25, gain: 0.06, delay: 0.1 }); },
@@ -341,7 +343,7 @@ const propHandlers = {
   lamp: (el) => onLampTap(el),
   // Inside the lab
   'window-moon': (el) => onMoonTap(el),
-  monitors: (el) => { react(el, 'is-reacting', 900); sfx.monitorStatic(); },
+  monitors: (el) => onMonitorTap(el),
   tank: (el) => { react(el, 'is-reacting', 1200); sfx.tankThump(); after(200, () => playSample('groan2', { gain: 0.3, rate: 0.7 })); },
   beakers: (el) => { react(el, 'is-reacting', 1200); [0, 120, 260].forEach((t) => after(t, sfx.blub)); },
   vat: (el) => { react(el, 'is-reacting', 1400); sfx.gurgle(); },
@@ -523,6 +525,83 @@ function onMoonTap(el) {
   } else {
     sfx.hoot();
   }
+}
+
+// ============================================================
+// Story 3 trigger (inside the lab): every MONITOR_EVERY_MS, one monitor wall blips a random
+// count (2–5) with beeps. Tap that monitor the same number of times. The answer is checked
+// ANSWER_PAUSE_MS after the last tap, so tapping nonstop overshoots instead of winning.
+// ============================================================
+const MONITOR_EVERY_MS = [8000, 11000];
+const MONITOR_FIRST_MS = 3000;   // first round after walking into the lab
+const BLIP_MS = 450;             // time between blips
+const ANSWER_PAUSE_MS = 1300;    // quiet time after the last tap before the answer is checked
+const ANSWER_WINDOW_MS = 7000;   // how long a round can be answered
+const monitorEls = $$('.monitors');
+let monitorRound = null;         // { el, count, taps, answerable }
+
+function scheduleMonitorRound(delay) {
+  cancelTimers('monitor');
+  after(delay, runMonitorRound, 'monitor');
+}
+
+function runMonitorRound() {
+  // Never interrupt an answer in progress
+  if (stage.dataset.view === 'lab' && stage.dataset.state === 'explore' && !monitorRound?.taps) {
+    clearMonitorRound();
+    const el = monitorEls[Math.floor(Math.random() * monitorEls.length)];
+    const count = 2 + Math.floor(Math.random() * 4);
+    const round = { el, count, taps: 0, answerable: false };
+    monitorRound = round;
+    for (let i = 0; i < count; i++) after(i * BLIP_MS, () => { react(el, 'is-blip', 260); sfx.blipBeep(); }, 'monitor-round');
+    after(count * BLIP_MS, () => { round.answerable = true; }, 'monitor-round');
+    after(count * BLIP_MS + ANSWER_WINDOW_MS, () => { if (monitorRound === round && !round.taps) clearMonitorRound(); }, 'monitor-round');
+  }
+  scheduleMonitorRound(MONITOR_EVERY_MS[0] + Math.random() * (MONITOR_EVERY_MS[1] - MONITOR_EVERY_MS[0]));
+}
+
+function clearMonitorRound() {
+  monitorRound = null;
+  cancelTimers('monitor-round');
+  cancelTimers('monitor-answer');
+  monitorEls.forEach((m) => { m.querySelector('.monitor-pips').textContent = ''; });
+}
+
+function onMonitorTap(el) {
+  react(el, 'is-reacting', 900);
+  const round = monitorRound;
+  if (!round || !round.answerable) return sfx.monitorStatic();
+  if (el !== round.el) {
+    // The other screen: just static, but it spoils an answer in progress
+    sfx.monitorStatic();
+    if (round.taps) failAnswer();
+    return;
+  }
+  round.taps++;
+  el.querySelector('.monitor-pips').textContent = '●'.repeat(round.taps);
+  sfx.answerBeep(round.taps);
+  hints.idleSince = clock.now;
+  hints.nudges = 0;
+  cancelTimers('monitor-answer');
+  after(ANSWER_PAUSE_MS, checkAnswer, 'monitor-answer');
+}
+
+function checkAnswer() {
+  const round = monitorRound;
+  if (!round) return;
+  if (round.taps !== round.count) return failAnswer();
+  clearMonitorRound();
+  sfx.granted();
+  after(300, () => playStory(STORIES.broadcast), 'story');
+}
+
+function failAnswer() {
+  const el = monitorRound.el;
+  react(el, 'is-wrong', 800);
+  sfx.wrong();
+  flashHint('The screens didn’t understand… they went quiet.', 3000);
+  after(800, clearMonitorRound, 'monitor-answer');
+  monitorRound.answerable = false;
 }
 
 // ============================================================
@@ -712,9 +791,13 @@ const STORIES = {
     trigger: {
       prop: 'monitors',
       view: 'lab',
-      inProgress: () => false, // replaced by the monitor count trigger (checkpoint 11)
-      progressText: '',
-      hints: [],
+      inProgress: () => monitorRound?.taps > 0,
+      progressText: 'The screens are listening…',
+      hints: [
+        { after: 8000, text: 'The screens are trying to say something…' },
+        { after: 30000, text: 'Count the screen’s blips…' },
+        { after: 55000, text: 'Answer the screen the same way it spoke.' },
+      ],
     },
     phases: ['bc-static', 'bc-alert', 'bc-map', 'bc-twist', 'bc-settle'],
     run(T) {
@@ -747,7 +830,7 @@ const STORIES = {
       });
       T(6900, () => stage.classList.add('bc-settle'));
     },
-    cleanup: () => { bcCount.textContent = '0'; },
+    cleanup: () => { bcCount.textContent = '0'; clearMonitorRound(); },
   },
 };
 
@@ -814,6 +897,8 @@ function setView(next) {
   after(VIEW_ZOOM_MS, () => stage.classList.remove('lab-enter', 'lab-exit'), 'view');
   hints.idleSince = clock.now; // a new place: hint pacing starts over
   hints.nudges = 0;
+  clearMonitorRound();
+  if (next === 'lab') scheduleMonitorRound(VIEW_ZOOM_MS + MONITOR_FIRST_MS);
   // While the moon event is unfound, the window moon pulses as you walk in
   if (next === 'lab' && !foundEvents.has(STORIES.antidote.id)) after(VIEW_ZOOM_MS, () => react(windowMoon, 'is-beckoning', 4000), 'view');
   focusView();

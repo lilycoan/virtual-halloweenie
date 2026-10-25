@@ -788,6 +788,22 @@ body {
   40% { opacity: 0.4; transform: translateX(3%) skewX(-6deg); }
   60% { opacity: 0.9; transform: translateY(5%); }
 }
+/* Story 3 trigger: a monitor wall blips its count (.is-blip); taps on it add pips below it */
+.monitors.is-blip .screen-glitch { opacity: 1; background: rgba(210, 255, 245, 0.75); box-shadow: 0 0 4cqw rgba(94, 242, 201, 0.9); animation: none; }
+.monitor-pips {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  translate: -50% 0.6cqh;
+  white-space: nowrap;
+  font: 800 max(16px, 4cqw)/1 ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  color: var(--lab-teal);
+  text-shadow: 0 0 6px rgba(94, 242, 201, 0.9);
+  pointer-events: none;
+}
+.monitors.is-wrong .monitor-pips { color: #ff8b8b; }
+.reduced-motion .monitors.is-blip .screen-glitch { background: rgba(210, 255, 245, 0.45); box-shadow: none; }
 .tank-pulse { background: radial-gradient(closest-side, rgba(200, 255, 230, 0.8), rgba(94, 242, 201, 0)); }
 .tank.is-reacting { animation: tank-thump 0.5s ease-out; }
 .tank.is-reacting .tank-pulse { animation: glow-pulse 1.2s ease-out; }

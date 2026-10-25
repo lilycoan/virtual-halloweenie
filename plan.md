@@ -104,7 +104,15 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Pause at 3.6 s: the counter held at 516 and the clock held for 2 s, with the dot animations paused.
     - Reduced motion: no static roll, alert blink or glitch animation.
     - Fixed while building: the glitch used `transform`, which would have moved the positioned screens. It's now filter-only.
-- [ ] **11. Monitor count trigger + hints** (moved inside, on the monitor walls). *Verify:* a random count each round; an extra tap resets; the exact count starts the story.
+- [x] **11. Monitor count trigger + hints** (inside, on the monitor walls).
+  - *Agent verified (CDP):*
+    - The first round came 3.3 s after entering (left wall, count 2).
+    - 3 taps for a count of 2 failed with the reset message.
+    - A tap on the other wall mid-answer reset the round.
+    - Exactly 2 taps showed ●● and "The screens are listening…", then started Emergency Broadcast, and the card appeared.
+    - Spam: 45 s of random taps on both walls and 45 s of steady taps on one wall started 0 stories.
+    - Hints appear at 8.5/31/56 s.
+  - The test driver (`cdp.mjs`) was recreated after macOS cleared the scratchpad's `/tmp` folder. The raw Freesound downloads in `audio-src/` were also lost; they aren't needed, since the trimmed versions are committed.
 - [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**
 - [ ] **13. Final verification against the brief + `debrief.md`.**
 
