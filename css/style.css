@@ -56,6 +56,10 @@ body {
   background: var(--sky);
 }
 
+/* The hidden attribute always wins, even over components that set their own display
+   (start screen, credits, unlock card, ending) */
+[hidden] { display: none !important; }
+
 /* Freeze ALL motion before Enter and while paused */
 .stage[data-state="start"] *,
 .stage[data-state="start"] *::before,
@@ -560,6 +564,7 @@ body {
 .pause-btn {
   pointer-events: auto;
   position: absolute;
+  z-index: 3; /* above the ending backdrop and the Paused label, so Play/Pause always works */
   top: max(3cqw, env(safe-area-inset-top));
   right: 3cqw;
   width: 44px;
@@ -631,8 +636,36 @@ body {
 .reduced-motion .unlock-card { animation: unlock-fade 3.4s ease forwards; }
 @keyframes unlock-fade { 0%, 100% { opacity: 0; } 12%, 80% { opacity: 1; } }
 
+/* Ending (all events found): dims the scene behind one centered card */
+.ending {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-inline: 6cqw;
+  background: radial-gradient(circle at 50% 45%, rgba(94, 242, 201, 0.25), rgba(8, 4, 16, 0.75) 70%);
+  pointer-events: auto; /* the UI layer passes taps through; the ending must catch them */
+  animation: fade-in-hold 0.6s ease forwards;
+}
+.ending-card {
+  padding: 6cqw 5cqw;
+  text-align: center;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(10, 30, 32, 0.97), rgba(10, 6, 20, 0.97));
+  border: 2px solid var(--lab-teal);
+  box-shadow: 0 0 40px rgba(94, 242, 201, 0.6);
+  animation: ending-pop 0.7s cubic-bezier(.3, 1.5, .5, 1) forwards;
+}
+.ending-card p, .ending-card h2 { margin: 0; }
+.ending-text { margin-block: 3cqw 5cqw !important; font-size: max(16px, 4.2cqw); line-height: 1.45; color: var(--ink); }
+@keyframes ending-pop { from { transform: scale(0.7); opacity: 0; } to { transform: none; opacity: 1; } }
+.reduced-motion .ending-card { animation: fade-in-hold 0.6s ease forwards; }
+.stage[data-state="ending"] .prop,
+.stage[data-state="ending"] .street-btn { pointer-events: none; }
+
 .paused-label {
   position: absolute;
+  z-index: 2;
   inset: 0;
   margin: 0;
   display: none;
@@ -680,7 +713,6 @@ body {
 }
 .stage:not([data-state="start"]) .start-screen,
 .stage:not([data-state="start"]) .credits { display: none; }
-.start-screen[hidden], .credits[hidden] { display: none; }
 
 .kicker { margin: 0; font-size: max(16px, 4.2cqw); letter-spacing: 0.12em; text-transform: uppercase; color: #ffb35c; }
 .start-screen h1 {

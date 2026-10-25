@@ -1,5 +1,6 @@
 // Virtual Hallo"weenie": Lab Breach
 //
+// States: start → explore ⇄ story, and once, after the last event is found: ending → explore.
 // Stories: every story is a STORIES entry played by one runner (playStory), which owns the
 // state change, input lock, ambient ducking, the zoom into the lab, cleanup and the unlock.
 //
@@ -34,10 +35,11 @@ const labProps = $('.lab-props');
 const uiLayer = $('.layer-ui');
 function applyInert() {
   const start = stage.dataset.state === 'start';
+  const blocked = start || stage.dataset.state === 'ending'; // the ending card is the only control
   const inLab = stage.dataset.view === 'lab';
   uiLayer.inert = start;
-  streetProps.inert = start || inLab;
-  labProps.inert = start || !inLab;
+  streetProps.inert = blocked || inLab;
+  labProps.inert = blocked || !inLab;
 }
 function setState(next) {
   stage.dataset.state = next;
@@ -212,6 +214,10 @@ const sfx = {
   gasHiss: () => noise({ dur: 2.6, gain: 0.22, filter: 'bandpass', freq: 3000, freqTo: 1200, q: 0.7 }),
   whoosh: () => noise({ dur: 1.0, gain: 0.5, filter: 'bandpass', freq: 400, freqTo: 4000, q: 0.8 }),
   doorSlam: () => { noise({ dur: 0.3, gain: 0.5, filter: 'lowpass', freq: 300 }); tone({ freq: 70, type: 'sine', dur: 0.4, gain: 0.4, slideTo: 40 }); },
+  fanfare: () => {
+    [523, 659, 784, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: 0.3, gain: 0.15, delay: i * 0.14 }));
+    [1047, 1319, 1568].forEach((f) => tone({ freq: f, type: 'triangle', dur: 1.2, gain: 0.1, delay: 0.6 }));
+  },
   allClear: () => [659, 784, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: 0.5, gain: 0.16, delay: i * 0.12 })),
   granted: () => { tone({ freq: 523, type: 'square', dur: 0.14, gain: 0.08 }); tone({ freq: 784, type: 'square', dur: 0.24, gain: 0.08, delay: 0.15 }); },
   // Pneumatic door: a hiss plus a rising hum
@@ -288,7 +294,7 @@ const credits = document.getElementById('credits');
 // Starts everything that runs on its own in the scene (also used by the ?skip dev flag)
 function startScene() {
   setState('explore');
-  hints.idleSince = clock.now;
+  resetHintPacing();
   scheduleAmbientEvent();
   after(FIRST_PATTERN_MS, playLampPattern, 'pattern');
   after(FIRST_FLIGHT_MS, () => launch(flights.street), 'flight');
@@ -390,8 +396,7 @@ function onLampTap(el) {
     lampProgress++;
     el.querySelector('.lamp-pip').textContent = `${lampProgress}/${LAMP_ORDER.length}`;
     react(el, 'is-relit', 1400); // restarts the pip even when a lit lamp is tapped again
-    hints.idleSince = clock.now; // progress counts as activity
-    hints.nudges = 0;
+    resetHintPacing(); // progress counts as activity
     if (lampProgress === LAMP_ORDER.length) after(450, () => playStory(STORIES.labBreach), 'story');
   } else {
     // Wrong lamp: buzz, blink all lamps amber, reset progress
@@ -511,8 +516,7 @@ function onMoonTap(el) {
     el.querySelector('.moon-pip').textContent = `${moonHits}/${ECLIPSE_HITS}`;
     react(el, 'is-relit', 1400);
     react(el, 'is-reacting');
-    hints.idleSince = clock.now;
-    hints.nudges = 0;
+    resetHintPacing();
     if (moonHits === ECLIPSE_HITS) after(450, () => playStory(STORIES.antidote), 'story');
     return;
   }
@@ -580,8 +584,7 @@ function onMonitorTap(el) {
   round.taps++;
   el.querySelector('.monitor-pips').textContent = '●'.repeat(round.taps);
   sfx.answerBeep(round.taps);
-  hints.idleSince = clock.now;
-  hints.nudges = 0;
+  resetHintPacing();
   cancelTimers('monitor-answer');
   after(ANSWER_PAUSE_MS, checkAnswer, 'monitor-answer');
 }
@@ -834,12 +837,9 @@ const STORIES = {
   },
 };
 
-let activeStory = null;
-
 // The one story runner. Input is locked by state 'story' (prop clicks check it),
 // and everything is scheduled on the scene clock under the 'story' tag, so pause freezes it.
 function playStory(story) {
-  activeStory = story;
   setState('story');
   setHint('');
   setAmbientLevel(0.15);
@@ -852,11 +852,9 @@ function endStory(story) {
   stage.classList.remove(...story.phases);
   setBanner('');
   story.cleanup?.();
-  activeStory = null;
   setAmbientLevel(viewAmbient(), 1.5);
   setState('explore');
-  hints.idleSince = clock.now;
-  hints.nudges = 0;
+  resetHintPacing();
   revealEvent(story.id, story.title);
   focusView();
 }
@@ -895,8 +893,7 @@ function setView(next) {
   setAmbientLevel(viewAmbient(), 1);
   cancelTimers('view');
   after(VIEW_ZOOM_MS, () => stage.classList.remove('lab-enter', 'lab-exit'), 'view');
-  hints.idleSince = clock.now; // a new place: hint pacing starts over
-  hints.nudges = 0;
+  resetHintPacing(); // a new place: hint pacing starts over
   clearMonitorRound();
   if (next === 'lab') scheduleMonitorRound(VIEW_ZOOM_MS + MONITOR_FIRST_MS);
   // While the moon event is unfound, the window moon pulses as you walk in
@@ -938,6 +935,12 @@ const WHERE_HINTS = {
 
 function currentTarget() {
   return Object.values(STORIES).find((st) => st.available() && !foundEvents.has(st.id));
+}
+
+// Progress, a finished story or a new place restarts the progressive hints
+function resetHintPacing() {
+  hints.idleSince = clock.now;
+  hints.nudges = 0;
 }
 
 function setHint(text) {
@@ -1002,11 +1005,33 @@ function revealEvent(id, title) {
     document.getElementById('events-count').textContent = foundEvents.size;
     react(eventsEl, 'is-new', 1200);
     if (id === 'lab-breach') openLab();
-    flashHint(foundEvents.size === EVENT_TOTAL ? 'You woke the whole lab! Every event can happen again.'
-      : id === 'lab-breach' ? 'The lab door opened… something else is stirring.'
-      : 'Something else is stirring…', 4500);
+    if (foundEvents.size === EVENT_TOTAL) return after(500, showEnding, 'unlock');
+    flashHint(id === 'lab-breach' ? 'The lab door opened… something else is stirring.' : 'Something else is stirring…', 4500);
   }, 'unlock');
 }
+
+// ============================================================
+// Ending: once, after the last event. Scene input waits until "Keep exploring".
+// ============================================================
+const ending = document.getElementById('ending');
+document.getElementById('ending-kicker').textContent = `✦ ${EVENT_TOTAL}/${EVENT_TOTAL} lab events ✦`;
+
+function showEnding() {
+  setState('ending');
+  setHint('');
+  ending.hidden = false;
+  sfx.fanfare();
+  document.getElementById('ending-btn').focus({ preventScroll: true });
+}
+
+document.getElementById('ending-btn').addEventListener('click', () => {
+  if (!isRunning()) return;
+  ending.hidden = true;
+  setState('explore');
+  resetHintPacing();
+  flashHint('Every event can happen again…', 4000);
+  focusView();
+});
 
 // ---------- Dev shortcuts ----------
 // ?skip           : bypass the start screen (no audio; for screenshots)

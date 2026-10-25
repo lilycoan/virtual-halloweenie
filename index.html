@@ -38,9 +38,9 @@
       <div class="beacon" style="--x:50.2; --y:14.9; --w:16" aria-hidden="true"></div>
 
       <!-- Story 1 trigger: three warning lights on the lab's white facade strip -->
-      <button class="prop lamp" data-prop="lamp" data-index="0" data-pip="1/3" style="--x:50; --y:31; --w:13" aria-label="Top warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
-      <button class="prop lamp" data-prop="lamp" data-index="1" data-pip="2/3" style="--x:50; --y:39.5; --w:13" aria-label="Middle warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
-      <button class="prop lamp" data-prop="lamp" data-index="2" data-pip="3/3" style="--x:50; --y:48; --w:13" aria-label="Bottom warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="0" style="--x:50; --y:31; --w:13" aria-label="Top warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="1" style="--x:50; --y:39.5; --w:13" aria-label="Middle warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
+      <button class="prop lamp" data-prop="lamp" data-index="2" style="--x:50; --y:48; --w:13" aria-label="Bottom warning light"><span class="lamp-bulb"></span><span class="lamp-pip" aria-hidden="true"></span></button>
 
       <!-- Moon -->
       <button class="prop moon" data-prop="moon" style="--x:79.6; --y:9.1; --w:14" aria-label="Moon"><span class="moon-glow"></span></button>
@@ -144,6 +144,15 @@
         <p class="unlock-title" id="unlock-title"></p>
         <p class="unlock-count" id="unlock-count"></p>
       </div>
+      <!-- Ending: shown once, when every lab event has been found -->
+      <section id="ending" class="ending" hidden role="dialog" aria-labelledby="ending-title">
+        <div class="ending-card">
+          <p class="unlock-kicker" id="ending-kicker"></p>
+          <h2 class="unlock-title" id="ending-title">You woke the whole lab!</h2>
+          <p class="ending-text">The breach, the antidote and the broadcast… every event can happen again. The lab never really sleeps. Come see what else wakes up at the park this Halloween.</p>
+          <button id="ending-btn" class="enter-btn small">Keep exploring</button>
+        </div>
+      </section>
       <p class="paused-label" aria-hidden="true">Paused</p>
       <p id="hint" class="hint" role="status" aria-live="polite"></p>
     </div>

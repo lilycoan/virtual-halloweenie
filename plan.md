@@ -113,7 +113,21 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Spam: 45 s of random taps on both walls and 45 s of steady taps on one wall started 0 stories.
     - Hints appear at 8.5/31/56 s.
   - The test driver (`cdp.mjs`) was recreated after macOS cleared the scratchpad's `/tmp` folder. The raw Freesound downloads in `audio-src/` were also lost; they aren't needed, since the trimmed versions are committed.
-- [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**
+- [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.** *In progress.*
+  - **Ending:** a one-time 3/3 card with a fanfare. Scene input is blocked and inert until "Keep exploring".
+    - *Agent verified (CDP):* a real playthrough of all three stories reached it with nothing forced. Focus lands on its button; a tap on the tank behind it was ignored. Closing it returns to explore with "Every event can happen again…". A replay afterward showed no ending and no card.
+    - Bug found and fixed: the backdrop covered the Pause button. Pause is now above it, and the ending button ignores clicks while paused.
+  - **Simplification pass:**
+    - The five copies of the hint-pacing reset are now one `resetHintPacing()`.
+    - Removed the dead `activeStory` and the stale `data-pip` attributes.
+    - Searched for unused CSS classes, keyframes, sfx, functions and constants; none found.
+    - Replaced the per-component `[hidden]` overrides with one global `[hidden]` rule, which fixed the hidden ending button being reachable with Tab (the same cause as Phase 1's start-screen bug).
+  - **Keyboard re-test:**
+    - Start: Enter first.
+    - Street: 3 lamps → moon → crows → streetlights → door → Pause.
+    - Lab: window moon → 2 monitor walls → tank → beakers → vat → Street → Pause.
+    - Enter on the door and on Street switches views and moves focus.
+  - **Credits:** no new external assets in Phase 2. The interior painting is credited, and the new sounds are synthesized.
 - [ ] **13. Final verification against the brief + `debrief.md`.**
 
 Dev flags: `?debug` outlines tap targets; `?skip` bypasses the start screen.
@@ -226,3 +240,9 @@ When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HH
 
 - **Developer:** opened the latest deployed build (`2b77334`) on a physical iPhone and confirmed it works. Also confirmed the credits name, "Lily Coan".
 - Phase 1 deliverables are complete: the working prototype at https://lilycoan.github.io/virtual-halloweenie/, the current `research.md`/`spec.md`/`plan.md`, the git log, and transcripts in `transcripts/`.
+
+### 2026-10-25: Developer phone test + playtest 5 (Phase 2, all three stories)
+
+- **Observed (relayed by the Developer):** "works great on phone just playtested." This was the build with all three stories (`9379882`): the explorable lab, the one-catch window moon, and the monitor count.
+- **Interpretation:** there were no blocking issues. That follows three Developer-led revisions of the moon trigger in this phase (too hard → easier → one catch → a reason to tap).
+- **Next:** playtest 6 with fresh testers on the build with the ending. Note the time to solve each story, and whether testers find the door and the monitors without help.
