@@ -113,7 +113,7 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Spam: 45 s of random taps on both walls and 45 s of steady taps on one wall started 0 stories.
     - Hints appear at 8.5/31/56 s.
   - The test driver (`cdp.mjs`) was recreated after macOS cleared the scratchpad's `/tmp` folder. The raw Freesound downloads in `audio-src/` were also lost; they aren't needed, since the trimmed versions are committed.
-- [ ] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.** *In progress.*
+- [x] **12. 3/3 ending, credits, simplification pass, deploy, phone + playtests 5–6.**
   - **Ending:** a one-time 3/3 card with a fanfare. Scene input is blocked and inert until "Keep exploring".
     - *Agent verified (CDP):* a real playthrough of all three stories reached it with nothing forced. Focus lands on its button; a tap on the tank behind it was ignored. Closing it returns to explore with "Every event can happen again…". A replay afterward showed no ending and no card.
     - Bug found and fixed: the backdrop covered the Pause button. Pause is now above it, and the ending button ignores clicks while paused.
@@ -128,7 +128,7 @@ Main risk: the zoom into the interior lining up with the painted door on every p
     - Lab: window moon → 2 monitor walls → tank → beakers → vat → Street → Pause.
     - Enter on the door and on Street switches views and moves focus.
   - **Developer decisions (2026-10-25):** keep the park line in the ending; retitle the app "Wake the Lab"; delete the unused `bg-placeholder.svg` and `lab-interior-placeholder.svg`.
-  - **Remaining:** playtest 6 with fresh testers on this build.
+  - Playtest 6 was done on this build (logged below).
   - **Credits:** no new external assets in Phase 2. The interior painting is credited, and the new sounds are synthesized.
 - [ ] **13. Final verification against the brief + `debrief.md`.**
 
@@ -248,3 +248,14 @@ When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HH
 - **Observed (relayed by the Developer):** "works great on phone just playtested." This was the build with all three stories (`9379882`): the explorable lab, the one-catch window moon, and the monitor count.
 - **Interpretation:** there were no blocking issues. That follows three Developer-led revisions of the moon trigger in this phase (too hard → easier → one catch → a reason to tap).
 - **Next:** playtest 6 with fresh testers on the build with the ending. Note the time to solve each story, and whether testers find the door and the monitors without help.
+
+### 2026-10-26: Peer playtest 6 (Phase 2, final build `c8a2eec`)
+
+- **Observed (relayed by the Developer):**
+  - It took "a normal amount of time for each tester to discover each story".
+  - Testers "said it worked well and flowed well".
+  - They "reacted excited and accomplished at the end".
+- **Interpretation:**
+  - Solve times no longer cluster at the extremes. Phase 1 swung from 2–3 s to frustration, and the first moon trigger was "way too hard".
+  - The ending card works as a payoff.
+  - No revision is needed. The remaining work is the final verification against the brief.
