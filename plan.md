@@ -130,7 +130,7 @@ Main risk: the zoom into the interior lining up with the painted door on every p
   - **Developer decisions (2026-10-25):** keep the park line in the ending; retitle the app "Wake the Lab"; delete the unused `bg-placeholder.svg` and `lab-interior-placeholder.svg`.
   - Playtest 6 was done on this build (logged below).
   - **Credits:** no new external assets in Phase 2. The interior painting is credited, and the new sounds are synthesized.
-- [ ] **13. Final verification against the brief + `debrief.md`.**
+- [x] **13. Final verification against the brief** (below). The `debrief.md` session is run by the Developer in a fresh chat, per its protocol.
 
 Dev flags: `?debug` outlines tap targets; `?skip` bypasses the start screen.
 Local preview: `python3 -m http.server 8765`, then open http://localhost:8765
@@ -259,3 +259,26 @@ When directed, save the complete conversation as `transcripts/plan-YYYY-MM-DD_HH
   - Solve times no longer cluster at the extremes. Phase 1 swung from 2–3 s to frustration, and the first moon trigger was "way too hard".
   - The ending card works as a payoff.
   - No revision is needed. The remaining work is the final verification against the brief.
+
+### 2026-10-26: Final verification against the brief (live URL, build `929e49a`)
+
+*Agent* = automated headless-Chrome checks on https://lilycoan.github.io/virtual-halloweenie/ (emulated phone). *Developer* = checks on a physical phone and in peer playtests.
+
+| Brief requirement | Evidence |
+|---|---|
+| One scene that fits a vertical phone with no scrolling | *Agent:* no scroll at 360×640, 390×844 and 430×932. Street and lab interior are two views of one page with no reload (see the trade-off in `spec.md`). |
+| Focal point + 3 or more environmental features | The lab tower; ruined skyscrapers, the cracked road, streetlights, the moon and sky (`spec.md`). |
+| 3 or more ambient effects + a looping ambient sound | Fog (2 depths), streetlight flicker, beacon pulse, shamblers, a flying crow; wind loop plus random groans, caws and siren. *Agent:* 8/8 sounds decoded on the live site, ambient loop running. |
+| 3 discoverable stories, 5–10 s each, with a beginning, middle and end, replayable | *Agent, live playthrough:* Lab Breach 8.6 s, Antidote Mix 7.6 s, Emergency Broadcast 8.0 s; replay checked after the ending. *Developer:* playtest 6, "normal amount of time" to discover each. |
+| Triggers through interaction, with unique feedback and visible progress | Lamps (n/4 pips), window moon (glow builds as the crow nears, then a catch), monitors (● pips). Every prop has its own reaction and sound. *Agent:* spam tests never solved the lamps or monitors. The one-catch moon can be spammed (accepted by the Developer for intuitiveness). |
+| Progressive text hints that hint, not instruct | Per-story hints at about 8/15 s → 30/35 s → 55/60 s, plus "where" hints for the lab. *Agent:* timed checks for each story. |
+| Other interactions disabled during a story, clear return afterward | The `story` state blocks props (touch and keyboard). *Agent:* taps during stories and the ending were ignored; focus returns to the current view. |
+| Start screen + Enter enables audio and animation; reduced motion honored before entry | *Agent, live:* `reduced-motion` was set on the start screen before Enter, and the AudioContext was `running` after Enter. *Developer:* sound works on iPhone. |
+| One Play/Pause control pauses everything together | *Agent, live:* pausing mid-breach for 2 s left the clock unmoved and the audio `suspended`. Earlier tests covered the zoom, Antidote Mix, the broadcast counter, and the ending card. |
+| Touch + keyboard, readable text, contrast, tap targets | *Agent:* all street and lab targets are ≥44 px at 360 px. All text is ≥16 px (the last labels were raised from 12–15 px in this check). Keyboard order was verified in both views. |
+| Public HTTPS URL, verified on a physical phone | *Agent:* all 13 page files return 200, and the live JS/CSS match the repo. *Developer:* the iPhone tests on 2026-10-25 and 2026-10-26 worked. |
+| Credits for the Developer and all assets; permitted material only | The credits panel lists the Developer, the two AI paintings and 8 CC0 Freesound sounds (licenses verified in `research.md`). Everything else is synthesized or original. |
+| Playtesting evidence + revisions | Six peer/Developer playtests plus the Developer's own Phase 2 tests, all logged above with the revisions they caused. |
+
+**Not verified by the Agent:** real-device audio and touch behavior beyond the Developer's iPhone reports; color contrast was judged visually, not measured.
+**Remaining deliverable:** the `debrief.md` session and its transcript.
