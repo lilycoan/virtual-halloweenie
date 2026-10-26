@@ -1,0 +1,398 @@
+commit 5ab68bfa901f93237e70a83112247249c4bb89a5
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-26 15:33:18 -0500
+
+    Add full build session transcript through final verification
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ transcripts/build-2026-10-26_153312.md | 1470 ++++++++++++++++++++++++++++++++
+ 1 file changed, 1470 insertions(+)
+
+commit f5c496a9a01da61f549b8bbe168499370621739b
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-26 15:31:05 -0500
+
+    Final verification against the brief; add debrief protocol
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ debrief.md | 206 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ plan.md    |  25 +++++++-
+ 2 files changed, 230 insertions(+), 1 deletion(-)
+
+commit 929e49aa6c22717ec9b9e0df01fd4b45e72330df
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-26 15:29:46 -0500
+
+    Readable text: raise remaining labels to 16px minimum
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+commit 7b63e29df1ef22ed309d67c1fb24b1319265beb9
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-26 15:27:41 -0500
+
+    Log playtest 6; checkpoint 12 complete
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ plan.md | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+commit c8a2eec62e671b35167d1572dedcd51c825f1059
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-25 15:26:46 -0500
+
+    Retitle to Wake the Lab; remove unused placeholder images
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ assets/img/bg-placeholder.svg | 115 ------------------------------------------
+ index.html                    |   4 +-
+ js/main.js                    |   2 +-
+ plan.md                       |   2 +
+ spec.md                       |   5 +-
+ 5 files changed, 9 insertions(+), 119 deletions(-)
+
+commit a80733455b88eaf84fea2351666523c694a0c5f5
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-25 15:11:36 -0500
+
+    Checkpoint 12 (part): 3/3 ending, simplification pass, global [hidden] rule; log playtest 5
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 34 ++++++++++++++++++++++++++++++-
+ index.html    | 15 +++++++++++---
+ js/main.js    | 65 +++++++++++++++++++++++++++++++++++++++++------------------
+ plan.md       | 22 +++++++++++++++++++-
+ 4 files changed, 111 insertions(+), 25 deletions(-)
+
+commit 9379882fbe957bfab39713d420adf35aa10f1354
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-25 15:03:15 -0500
+
+    Checkpoint 11: monitor count trigger for Emergency Broadcast
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 16 ++++++++++
+ index.html    |  4 +--
+ js/main.js    | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++++++----
+ plan.md       | 10 ++++++-
+ spec.md       |  2 +-
+ 5 files changed, 118 insertions(+), 9 deletions(-)
+
+commit 860f60f5762b70d8cb9717c8f87fa2152ee07c35
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-25 14:58:37 -0500
+
+    Checkpoint 10: Emergency Broadcast sequence; full session transcript
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css                          |   72 +-
+ index.html                             |   16 +
+ js/main.js                             |   68 ++
+ plan.md                                |    8 +-
+ spec.md                                |    3 +-
+ transcripts/build-2026-10-25_145811.md | 1246 ++++++++++++++++++++++++++++++++
+ 6 files changed, 1410 insertions(+), 3 deletions(-)
+
+commit 9aecaf0139c2d2b352d0bbfd37fa01469be2fe06
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 18:04:34 -0500
+
+    Window moon: entry pulse, approach glow, earlier hint
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 5 +++++
+ js/main.js    | 8 +++++++-
+ plan.md       | 3 +++
+ spec.md       | 2 +-
+ 4 files changed, 16 insertions(+), 2 deletions(-)
+
+commit 6378d12dc73d36abda447f4adb5885a48bfa53ae
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 18:03:05 -0500
+
+    Eclipse: one catch solves it (Developer request)
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ js/main.js | 4 ++--
+ plan.md    | 4 ++++
+ spec.md    | 2 +-
+ 3 files changed, 7 insertions(+), 3 deletions(-)
+
+commit ad8208b5b798b1d0b2df9dffe118f1da271f99f8
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 17:57:01 -0500
+
+    Explorable lab interior (street/lab views), Eclipse on the window moon, eased timing
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css |  98 +++++++++++++++++++----
+ index.html    |  25 ++++--
+ js/main.js    | 248 +++++++++++++++++++++++++++++++++++++---------------------
+ plan.md       |  14 +++-
+ spec.md       |  26 +++---
+ 5 files changed, 289 insertions(+), 122 deletions(-)
+
+commit b9a6d5c39362b9f8d83549d9f7d9c9ecec2ffd1e
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 17:27:08 -0500
+
+    Checkpoint 9: Eclipse trigger (moon + crow timing), story-aware hints
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css |  36 ++++++++----
+ index.html    |   4 +-
+ js/main.js    | 180 +++++++++++++++++++++++++++++++++++++++++++++++++---------
+ plan.md       |  15 ++++-
+ spec.md       |   2 +-
+ 5 files changed, 194 insertions(+), 43 deletions(-)
+
+commit cfd023bba260883fc8d229fe6b0cb77d4219a038
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 17:20:14 -0500
+
+    Checkpoint 8: Antidote Mix sequence inside the lab
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 152 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ index.html    |  13 +++++
+ js/main.js    |  69 +++++++++++++++++++++-----
+ plan.md       |  15 +++++-
+ 4 files changed, 235 insertions(+), 14 deletions(-)
+
+commit 7bcc282bf6ca343aae2c1d54d4d78c306497fcad
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 17:14:36 -0500
+
+    Checkpoint 7: shared story runner, lab door unlock, zoom into lab interior
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ .../img/Neon Biotech Lab Containment Chamber.png   | Bin 0 -> 2019818 bytes
+ assets/img/lab-interior.jpg                        | Bin 0 -> 343739 bytes
+ css/style.css                                      |  59 ++++++++
+ index.html                                         |  15 +-
+ js/main.js                                         | 160 +++++++++++++++------
+ plan.md                                            |   9 +-
+ research.md                                        |   2 +
+ 7 files changed, 196 insertions(+), 49 deletions(-)
+
+commit c678c7ca87964d1bae2f30f6f997c1c815914ed6
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 17:09:44 -0500
+
+    Phase 2 spec and checkpoints (approved by Developer)
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ plan.md | 12 ++++++++++++
+ spec.md | 30 ++++++++++++++++++++++++++++++
+ 2 files changed, 42 insertions(+)
+
+commit 0c4acd1615e338571a97c2ed5b2811bfba324a36
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-19 11:02:58 -0500
+
+    Record Phase 1 final phone verification
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ plan.md | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+commit 90abe5dce1ddbe6991d4c2f97086f7ec803a3211
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 15:11:33 -0500
+
+    Add full Phase 1 transcript through playtest 4
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ transcripts/build-2026-10-18_151015.md | 579 +++++++++++++++++++++++++++++++++
+ 1 file changed, 579 insertions(+)
+
+commit 2b773349f9954800f55540e84c2a38023873aaec
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 15:08:54 -0500
+
+    Keyboard: make scene inert behind start screen via single setState(); log playtest 4
+    
+    Keyboard-only test found Tab reached hidden scene props before Enter.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ js/main.js | 17 +++++++++++++----
+ plan.md    | 17 ++++++++++++++++-
+ 2 files changed, 29 insertions(+), 5 deletions(-)
+
+commit d0e2bfe2888a7477b9c26fdc982377eb4463158c
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 15:04:45 -0500
+
+    Playtest 3 revisions: remove lamp rings, 4-step lamp pattern with a repeat
+    
+    Testers tapped lamps in 2-3s and reading order solved it. Any 3-lamp order is
+    a rotation of a sweep, so the trigger is now middle-bottom-middle-top, revealed
+    only by the lamps' blink pattern. Hints updated to point at the pattern.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 22 +---------------------
+ js/main.js    | 33 ++++++++++++++++++++-------------
+ plan.md       | 20 ++++++++++++++++++++
+ spec.md       | 14 +++++++-------
+ 4 files changed, 48 insertions(+), 41 deletions(-)
+
+commit 495c96935acadce8a811477b6d491ed2d8d2ef73
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 14:58:44 -0500
+
+    Playtest 2 revisions: less hand-holding, remove confusing newspapers
+    
+    Door text back to ACCESS DENIED; lamps answer only after 4 off-target taps
+    (15s cooldown); hint nudges 1s/tap; hints at 15/35/60s; pattern blink 12s/14s.
+    Pacing values are now named constants.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 23 ++---------------------
+ index.html    |  6 ++----
+ js/main.js    | 31 ++++++++++++++++++++-----------
+ plan.md       | 19 +++++++++++++++++++
+ research.md   |  2 +-
+ spec.md       | 18 +++++++++---------
+ 6 files changed, 53 insertions(+), 46 deletions(-)
+
+commit 52794101d0aa75b1bb602da98457b85f1b3e720a
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 14:54:10 -0500
+
+    Playtest 1 revisions: 'wake the lab' framing, unlock card, props point to lamps, lamp tap ring
+    
+    Testers triggered the breach but didn't recognize it as the 'secret', and other
+    props felt pointless. Reframes the goal, adds an explicit unlock payoff, makes
+    every non-trigger prop draw the eye to the lamps, and adds a tap affordance.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 65 +++++++++++++++++++++++++++++++++++++++-----
+ index.html    | 12 ++++++---
+ js/main.js    | 87 ++++++++++++++++++++++++++++++++++++++---------------------
+ plan.md       | 22 +++++++++++++++
+ spec.md       | 12 ++++++---
+ 5 files changed, 153 insertions(+), 45 deletions(-)
+
+commit 17151cf8fdafe6e58712920ef40549df250be760
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 14:48:02 -0500
+
+    Show Secrets 0/1 for Phase 1; drive badge, goal and found message from SECRET_TOTAL
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ index.html |  4 ++--
+ js/main.js | 14 ++++++++++++--
+ spec.md    |  8 +++++---
+ 3 files changed, 19 insertions(+), 7 deletions(-)
+
+commit 15a564a2132fecfadd59867839d8d63ad99d1b6c
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 14:45:49 -0500
+
+    Discoverability: goal + secrets counter, lamp pattern hint, smarter hints, progress pips
+    
+    Developer phone test: unclear what to do. Adds a stated goal, a diegetic lamp
+    pattern blink, earlier hints that also respond to taps on other props, and
+    progress/wrong-order feedback. Fixes react() cleanup timers colliding across lamps.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ css/style.css | 55 ++++++++++++++++++++++++++++++++++++++++++++
+ index.html    | 10 ++++----
+ js/main.js    | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++--------
+ plan.md       | 22 ++++++++++++++++++
+ spec.md       | 22 +++++++++++++-----
+ 5 files changed, 163 insertions(+), 20 deletions(-)
+
+commit a9a735667e1f9d6eda053c8202163b0af5144374
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 14:41:12 -0500
+
+    Add Phase 1 build transcript
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ transcripts/build-2026-10-18_144005.md | 242 +++++++++++++++++++++++++++++++++
+ 1 file changed, 242 insertions(+)
+
+commit 131b2a5b62ed38aa8e6f19c5f0b56808b408ba6c
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-18 14:38:47 -0500
+
+    Phase 1 prototype: ambience, audio, Play/Pause, Lab Breach story, hints, credits
+    
+    - Light-only prop overlays aligned to the painted background
+    - Scene clock + AudioContext suspend so Pause freezes motion, sound, timers, input
+    - Ambient: fog, streetlight flicker, beacon pulse, shamblers, debris, CC0 wind loop + groans/caws/siren
+    - Lab Breach (~8.6s): lamp-order trigger, alarm, gas, zombies, decon flash, all clear
+    - Reduced-motion variants, progressive hints, credits panel
+    - Docs: research asset table, spec revisions, plan progress
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ .vscode/settings.json                  |   3 +
+ assets/audio/ambient-distant-siren.mp3 | Bin 0 -> 120524 bytes
+ assets/audio/ambient-wind-loop.mp3     | Bin 0 -> 480906 bytes
+ assets/audio/crow-673554.mp3           | Bin 0 -> 9836 bytes
+ assets/audio/crow-813115.mp3           | Bin 0 -> 8396 bytes
+ assets/audio/groan-754438.mp3          | Bin 0 -> 12716 bytes
+ assets/audio/groan-754441.mp3          | Bin 0 -> 10988 bytes
+ assets/audio/moan-445995.mp3           | Bin 0 -> 17900 bytes
+ assets/audio/story-zombie-crowd.mp3    | Bin 0 -> 72620 bytes
+ css/style.css                          | 570 ++++++++++++++++++++++++++++++---
+ index.html                             | 174 +++++-----
+ js/main.js                             | 450 +++++++++++++++++++++++++-
+ plan.md                                |  16 +
+ research.md                            |  14 +-
+ spec.md                                |  11 +-
+ 15 files changed, 1094 insertions(+), 144 deletions(-)
+
+commit e772154cd4918dce54a0b93f0a804ce26b9ef45d
+Author: Lily <lilyecoan@gmail.com>
+Date:   2026-10-16 15:46:16 -0500
+
+    Checkpoint 1: stage layout, layer scaffold, painted background, UI shell
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ .gitignore                                      |   1 +
+ .nojekyll                                       |   0
+ AGENTS.md                                       |  38 +++++
+ CLAUDE.md                                       |   1 +
+ assets/img/Moonlit Ruins and the Last Tower.png | Bin 0 -> 2322574 bytes
+ assets/img/bg-city.jpg                          | Bin 0 -> 400861 bytes
+ assets/img/bg-placeholder.svg                   | 115 +++++++++++++++
+ brief.md                                        |  71 +++++++++
+ css/style.css                                   | 187 ++++++++++++++++++++++++
+ index.html                                      | 127 ++++++++++++++++
+ js/main.js                                      |  31 ++++
+ plan.md                                         |  31 ++++
+ reference/.gitkeep                              |   0
+ research.md                                     |  47 ++++++
+ spec.md                                         |  90 ++++++++++++
+ transcripts/.gitkeep                            |   0
+ 16 files changed, 739 insertions(+)
